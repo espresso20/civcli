@@ -31,6 +31,14 @@ type Display struct {
 
 	// Add CommandHandler reference to Display struct
 	CommandHandler *game.CommandHandler
+
+	// Track tab completion state
+	tabCompletionState struct {
+		shownOptions      bool
+		lastCommand       string
+		selectedOptionIdx int
+		currentOptions    []string
+	}
 }
 
 // NewDisplay creates a new display
@@ -101,50 +109,165 @@ func (d *Display) setupUI() {
 	d.input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyTab {
 			currentText := d.input.GetText()
-			suggestions := []string{}
 
-			// Split the current text into parts
+			// If text is empty, suggest the first command
+			if currentText == "" {
+				commands := d.CommandHandler.GetCommandList()
+				if len(commands) > 0 {
+					d.input.SetText(commands[0])
+				}
+				return nil
+			}
+
+			// Split the text into parts
 			parts := strings.Fields(currentText)
 
+			// Determine what we're completing (a command or a subcommand)
 			if len(parts) == 0 {
-				// Suggest top-level commands
-				suggestions = d.CommandHandler.GetCommandList()
+				// This shouldn't happen if currentText isn't empty, but just in case
+				return event
+			}
+
+			// Get the part we're currently typing (last word)
+			lastWord := parts[len(parts)-1]
+
+			// Check if we just finished typing a complete word (space at the end)
+			isCompletedWord := strings.HasSuffix(currentText, " ")
+
+			// Determine suggestions based on context
+			var suggestions []string
+
+			if len(parts) == 1 && !isCompletedWord {
+				// We're typing the first word (a command) - suggest from command list
+				commands := d.CommandHandler.GetCommandList()
+				for _, cmd := range commands {
+					if strings.HasPrefix(cmd, lastWord) {
+						suggestions = append(suggestions, cmd)
+					}
+				}
 			} else {
-				// Suggest subcommands or options based on the first command
-				firstCommand := parts[0]
-				switch firstCommand {
+				// We're typing a subcommand or have completed the command
+				command := parts[0]
+
+				// Get suggestions based on the command
+				switch command {
 				case "gather":
-					suggestions = []string{"food", "wood", "stone"} // Example resources
+					suggestions = []string{"food", "wood", "stone"}
 				case "build":
-					suggestions = []string{"hut", "farm", "mine"} // Example buildings
+					suggestions = []string{"hut", "farm", "mine"}
 				case "research":
-					suggestions = []string{"agriculture", "mining", "writing"} // Example technologies
+					suggestions = []string{"agriculture", "mining", "writing"}
+				case "assign":
+					suggestions = []string{"villager", "task", "building"}
+				case "library":
+					suggestions = []string{"villagers", "resources", "buildings", "ages", "commands", "tips"}
 				default:
-					suggestions = []string{"help", "status", "quit"} // Default fallback
+					suggestions = []string{"help", "status", "quit"}
+				}
+
+				// If we're not at a space, filter based on what we've typed so far
+				if !isCompletedWord && len(parts) > 1 {
+					filteredSuggestions := []string{}
+					for _, suggestion := range suggestions {
+						if strings.HasPrefix(suggestion, lastWord) {
+							filteredSuggestions = append(filteredSuggestions, suggestion)
+						}
+					}
+					suggestions = filteredSuggestions
 				}
 			}
 
-			// Cycle through suggestions
+			// If we have suggestions, use them
 			if len(suggestions) > 0 {
-				currentIndex := -1
+				// Check if we're showing options for a command
+				if isCompletedWord && len(parts) == 1 {
+					// Static variable to track if we've shown the options
+					// It will persist between function calls
+					static := struct {
+						optionsShown bool
+						currentIdx   int
+						lastCommand  string
+					}{}
+
+					command := parts[0]
+
+					// Reset state if the command changed
+					if static.lastCommand != command {
+						static.optionsShown = false
+						static.currentIdx = 0
+						static.lastCommand = command
+					}
+
+					// If options haven't been shown yet, show them first
+					if !static.optionsShown {
+						d.output.Clear()
+						d.output.SetTextColor(tcell.ColorTeal)
+						d.output.Write([]byte(fmt.Sprintf("[::b]Available options for '%s':[::b]\n\n", command)))
+						d.output.SetTextColor(tcell.ColorYellow)
+
+						for _, suggestion := range suggestions {
+							d.output.Write([]byte("  " + suggestion + "\n"))
+						}
+
+						d.output.Write([]byte("\n[#f1c40f]Press Tab again to cycle through options[#ffffff]\n"))
+
+						// Mark that we've shown options
+						static.optionsShown = true
+						return nil
+					} else {
+						// Options have been shown, now we cycle through them
+						d.input.SetText(currentText + suggestions[static.currentIdx])
+						static.currentIdx = (static.currentIdx + 1) % len(suggestions)
+						return nil
+					}
+				} else if isCompletedWord && len(parts) > 1 {
+					// Cycling through subcommand options after a command and its first subcommand
+					// Get the current suggestion to append
+					currentIndex := 0
+					if len(parts) > 1 && parts[len(parts)-1] != "" {
+						// We already have a subcommand, find its index
+						for i, suggestion := range suggestions {
+							if parts[len(parts)-1] == suggestion {
+								currentIndex = (i + 1) % len(suggestions)
+								break
+							}
+						}
+					}
+
+					// Replace the last part with the next suggestion
+					if len(parts) > 1 && parts[len(parts)-1] != "" {
+						parts[len(parts)-1] = suggestions[currentIndex]
+						d.input.SetText(strings.Join(parts, " ") + " ")
+					} else {
+						// Append the first suggestion
+						d.input.SetText(currentText + suggestions[currentIndex])
+					}
+					return nil
+				}
+
+				// We're completing a partial word
+				// Try to find if we're cycling through suggestions
+				currentSuggestionIndex := -1
 				for i, suggestion := range suggestions {
-					if len(parts) > 1 && suggestion == parts[len(parts)-1] {
-						currentIndex = i
+					if lastWord == suggestion {
+						currentSuggestionIndex = i
 						break
 					}
 				}
-				nextIndex := (currentIndex + 1) % len(suggestions)
 
-				// Preserve initial command and append the suggestion
-				if len(parts) > 1 {
-					parts[len(parts)-1] = suggestions[nextIndex]
+				// Get the next suggestion (or the first one if not found)
+				nextIndex := (currentSuggestionIndex + 1) % len(suggestions)
+				chosenSuggestion := suggestions[nextIndex]
+
+				// Replace the last word with the suggestion
+				if len(parts) == 1 {
+					// For the first word, just set it directly with a space
+					d.input.SetText(chosenSuggestion + " ")
 				} else {
-					parts = append(parts, suggestions[nextIndex])
+					// For subcommands, preserve the command and replace the last word
+					newParts := append(parts[:len(parts)-1], chosenSuggestion)
+					d.input.SetText(strings.Join(newParts, " ") + " ")
 				}
-				d.input.SetText(strings.Join(parts, " "))
-			} else {
-				d.output.Clear()
-				d.output.Write([]byte("No suggestions available\n"))
 			}
 
 			return nil
