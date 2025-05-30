@@ -23,11 +23,17 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// Initialize the display
-	display := ui.NewDisplay()
+	// Create a CommandHandler instance
+	commandHandler := game.NewCommandHandler(nil) // Pass the GameEngine instance later
 
-	// Initialize the game engine
+	// Initialize the display with the CommandHandler
+	display := ui.NewDisplay(commandHandler)
+
+	// Initialize the game engine with the display
 	gameEngine := game.NewGameEngine(display)
+
+	// Update the CommandHandler to use the GameEngine
+	commandHandler.Game = gameEngine
 
 	// Show the introduction
 	display.ShowIntro()
