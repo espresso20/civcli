@@ -97,6 +97,61 @@ func (d *Display) setupUI() {
 		}
 	})
 
+	// Enhance input field to support Minecraft-style tab completion
+	d.input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyTab {
+			currentText := d.input.GetText()
+			suggestions := []string{}
+
+			// Split the current text into parts
+			parts := strings.Fields(currentText)
+
+			if len(parts) == 0 {
+				// Suggest top-level commands
+				suggestions = d.CommandHandler.GetCommandList()
+			} else {
+				// Suggest subcommands or options based on the first command
+				firstCommand := parts[0]
+				switch firstCommand {
+				case "gather":
+					suggestions = []string{"food", "wood", "stone"} // Example resources
+				case "build":
+					suggestions = []string{"hut", "farm", "mine"} // Example buildings
+				case "research":
+					suggestions = []string{"agriculture", "mining", "writing"} // Example technologies
+				default:
+					suggestions = []string{"help", "status", "quit"} // Default fallback
+				}
+			}
+
+			// Cycle through suggestions
+			if len(suggestions) > 0 {
+				currentIndex := -1
+				for i, suggestion := range suggestions {
+					if len(parts) > 1 && suggestion == parts[len(parts)-1] {
+						currentIndex = i
+						break
+					}
+				}
+				nextIndex := (currentIndex + 1) % len(suggestions)
+
+				// Preserve initial command and append the suggestion
+				if len(parts) > 1 {
+					parts[len(parts)-1] = suggestions[nextIndex]
+				} else {
+					parts = append(parts, suggestions[nextIndex])
+				}
+				d.input.SetText(strings.Join(parts, " "))
+			} else {
+				d.output.Clear()
+				d.output.Write([]byte("No suggestions available\n"))
+			}
+
+			return nil
+		}
+		return event
+	})
+
 	// Create dashboard components
 	d.resources = tview.NewTable().
 		SetBorders(false).
@@ -137,15 +192,16 @@ func (d *Display) setupUI() {
 		AddItem(d.status, 5, 1, false).
 		AddItem(d.research, 5, 1, false)
 
-	topDashboard := tview.NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(leftPanel, 0, 1, false).
-		AddItem(d.rightPanel, 0, 1, false)
+	// topDashboard := tview.NewFlex().
+	// 	SetDirection(tview.FlexColumn).
+	// 	AddItem(leftPanel, 0, 1, false).
+	// 	AddItem(d.rightPanel, 0, 1, false)
 
 	d.dashboard = tview.NewGrid().
 		SetRows(20, 0).
 		SetColumns(0).
-		AddItem(topDashboard, 0, 0, 1, 1, 0, 0, false).
+		AddItem(leftPanel, 0, 0, 1, 1, 0, 0, false).
+		AddItem(d.rightPanel, 0, 1, 1, 1, 0, 0, false).
 		AddItem(d.output, 1, 0, 1, 1, 0, 0, false)
 
 	// Create main layout
