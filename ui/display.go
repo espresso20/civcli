@@ -28,6 +28,9 @@ type Display struct {
 	research   *tview.TextView
 	inputChan  chan string
 	rightPanel *tview.Flex
+
+	// Add CommandHandler reference to Display struct
+	CommandHandler *game.CommandHandler
 }
 
 // NewDisplay creates a new display
@@ -68,6 +71,29 @@ func (d *Display) setupUI() {
 				}
 			}
 		})
+
+	// Correct access to GetCommandList and implement manual autocomplete
+	d.input.SetChangedFunc(func(text string) {
+		if text == "" {
+			return
+		}
+
+		// Filter commands based on current text
+		var suggestions []string
+		for _, cmd := range d.CommandHandler.GetCommandList() {
+			if strings.HasPrefix(cmd, text) {
+				suggestions = append(suggestions, cmd)
+			}
+		}
+
+		// Display suggestions (this can be enhanced with a dropdown or similar UI)
+		if len(suggestions) > 0 {
+			d.output.Clear()
+			for _, suggestion := range suggestions {
+				d.output.Write([]byte(suggestion + "\n"))
+			}
+		}
+	})
 
 	// Create dashboard components
 	d.resources = tview.NewTable().
