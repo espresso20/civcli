@@ -34,11 +34,13 @@ type Display struct {
 }
 
 // NewDisplay creates a new display
-func NewDisplay() *Display {
+// Update NewDisplay to accept CommandHandler as a parameter
+func NewDisplay(commandHandler *game.CommandHandler) *Display {
 	d := &Display{
-		app:       tview.NewApplication(),
-		pages:     tview.NewPages(),
-		inputChan: make(chan string),
+		app:            tview.NewApplication(),
+		pages:          tview.NewPages(),
+		inputChan:      make(chan string),
+		CommandHandler: commandHandler, // Assign CommandHandler
 	}
 	d.setupUI()
 	return d
