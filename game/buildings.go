@@ -31,7 +31,7 @@ func NewBuildingManager() *BuildingManager {
 			"farm":        {"food": 2},
 			"lumber_mill": {"wood": 2},
 			"mine":        {"stone": 1, "gold": 0.2},
-			"market":      {"gold": 1},
+			"market":      {"gold": 0.5},
 			"library":     {"knowledge": 0.5},
 		},
 	}
