@@ -57,7 +57,7 @@ func (vm *VillagerManager) Add(villagerType string, count int) bool {
 	return false
 }
 
-// Remove removes villagers
+// Remove villagers
 func (vm *VillagerManager) Remove(villagerType string, count int) bool {
 	if v, exists := vm.villagers[villagerType]; exists && v.Count >= count {
 		v.Count -= count
@@ -94,7 +94,7 @@ func (vm *VillagerManager) Remove(villagerType string, count int) bool {
 	return false
 }
 
-// Assign assigns villagers to gather a resource
+// Assigns villagers to gather a resource
 func (vm *VillagerManager) Assign(villagerType, resource string, count int) bool {
 	if v, exists := vm.villagers[villagerType]; exists {
 		// Check if this villager type can gather this resource
@@ -115,7 +115,7 @@ func (vm *VillagerManager) Assign(villagerType, resource string, count int) bool
 	return false
 }
 
-// Unassign unassigns villagers from a resource
+// Unassign villagers from a resource
 func (vm *VillagerManager) Unassign(villagerType, resource string, count int) bool {
 	if v, exists := vm.villagers[villagerType]; exists {
 		// Check if this villager type can gather this resource
