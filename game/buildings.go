@@ -1,0 +1,148 @@
+package game
+
+// BuildingManager handles building construction and effects
+type BuildingManager struct {
+	buildings       map[string]int
+	buildingCosts   map[string]map[string]float64
+	buildingEffects map[string]map[string]float64
+}
+
+// NewBuildingManager creates a new building manager
+func NewBuildingManager() *BuildingManager {
+	bm := &BuildingManager{
+		buildings: map[string]int{
+			"hut":         0,
+			"farm":        0,
+			"lumber_mill": 0,
+			"mine":        0,
+			"market":      0,
+			"library":     0,
+		},
+		buildingCosts: map[string]map[string]float64{
+			"hut":         {"wood": 3},
+			"farm":        {"wood": 10},
+			"lumber_mill": {"wood": 15, "stone": 5},
+			"mine":        {"wood": 10, "stone": 10},
+			"market":      {"wood": 20, "stone": 10, "gold": 5},
+			"library":     {"wood": 15, "stone": 10, "knowledge": 5},
+		},
+		buildingEffects: map[string]map[string]float64{
+			"hut":         {"villager_capacity": 2},
+			"farm":        {"food": 2},
+			"lumber_mill": {"wood": 2},
+			"mine":        {"stone": 1, "gold": 0.5},
+			"market":      {"gold": 1},
+			"library":     {"knowledge": 1},
+		},
+	}
+	return bm
+}
+
+// Add adds new buildings
+func (bm *BuildingManager) Add(building string, count int) bool {
+	if _, exists := bm.buildings[building]; exists {
+		bm.buildings[building] += count
+		return true
+	}
+	return false
+}
+
+// Remove removes buildings
+func (bm *BuildingManager) Remove(building string, count int) bool {
+	if _, exists := bm.buildings[building]; exists && bm.buildings[building] >= count {
+		bm.buildings[building] -= count
+		return true
+	}
+	return false
+}
+
+// GetCount returns the count of a specific building
+func (bm *BuildingManager) GetCount(building string) int {
+	return bm.buildings[building]
+}
+
+// GetAll returns all buildings and their counts
+func (bm *BuildingManager) GetAll() map[string]int {
+	return bm.buildings
+}
+
+// GetCost returns the cost to build a specific building
+func (bm *BuildingManager) GetCost(building string) map[string]float64 {
+	if cost, exists := bm.buildingCosts[building]; exists {
+		return cost
+	}
+	return nil
+}
+
+// GetEffect returns the effect of a specific building
+func (bm *BuildingManager) GetEffect(building string) map[string]float64 {
+	if effect, exists := bm.buildingEffects[building]; exists {
+		return effect
+	}
+	return nil
+}
+
+// CanBuild checks if we can build a specific building
+func (bm *BuildingManager) CanBuild(building string, resources *ResourceManager) bool {
+	costs, exists := bm.buildingCosts[building]
+	if !exists {
+		return false
+	}
+
+	// Check if we have enough resources
+	for resource, amount := range costs {
+		if !resources.Has(resource, amount) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Build builds a new building
+func (bm *BuildingManager) Build(building string, resources *ResourceManager) bool {
+	if !bm.CanBuild(building, resources) {
+		return false
+	}
+
+	// Spend resources
+	for resource, amount := range bm.buildingCosts[building] {
+		resources.Remove(resource, amount)
+	}
+
+	// Add the building
+	bm.Add(building, 1)
+	return true
+}
+
+// Update updates resources based on building effects
+func (bm *BuildingManager) Update(resources *ResourceManager) {
+	for building, count := range bm.buildings {
+		if count > 0 {
+			if effects, exists := bm.buildingEffects[building]; exists {
+				for resource, amount := range effects {
+					if resource != "villager_capacity" {
+						resources.Add(resource, amount*float64(count))
+					}
+				}
+			}
+		}
+	}
+}
+
+// GetVillagerCapacity calculates total villager capacity from buildings
+func (bm *BuildingManager) GetVillagerCapacity() int {
+	capacity := 1 // Start with capacity for 1 villager
+
+	for building, count := range bm.buildings {
+		if count > 0 {
+			if effects, exists := bm.buildingEffects[building]; exists {
+				if cap, hasCapacity := effects["villager_capacity"]; hasCapacity {
+					capacity += int(cap * float64(count))
+				}
+			}
+		}
+	}
+
+	return capacity
+}
