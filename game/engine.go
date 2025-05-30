@@ -42,7 +42,7 @@ func NewGameEngine(display DisplayInterface) *GameEngine {
 		Running:      false,
 		Tick:         0,
 		Age:          "Stone Age",
-		TickDuration: 1 * time.Second,
+		TickDuration: 5 * time.Second,
 	}
 
 	// Initialize game components
