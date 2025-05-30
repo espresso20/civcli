@@ -19,20 +19,20 @@ func NewBuildingManager() *BuildingManager {
 			"library":     0,
 		},
 		buildingCosts: map[string]map[string]float64{
-			"hut":         {"wood": 3},
-			"farm":        {"wood": 10},
-			"lumber_mill": {"wood": 15, "stone": 5},
-			"mine":        {"wood": 10, "stone": 10},
-			"market":      {"wood": 20, "stone": 10, "gold": 5},
-			"library":     {"wood": 15, "stone": 10, "knowledge": 5},
+			"hut":         {"wood": 10},
+			"farm":        {"wood": 20, "stone": 50, "food": 100},
+			"lumber_mill": {"wood": 100, "stone": 300},
+			"mine":        {"wood": 100, "stone": 400},
+			"market":      {"wood": 200, "stone": 200, "gold": 100},
+			"library":     {"wood": 400, "stone": 200, "knowledge": 100},
 		},
 		buildingEffects: map[string]map[string]float64{
 			"hut":         {"villager_capacity": 2},
 			"farm":        {"food": 2},
 			"lumber_mill": {"wood": 2},
-			"mine":        {"stone": 1, "gold": 0.5},
+			"mine":        {"stone": 1, "gold": 0.2},
 			"market":      {"gold": 1},
-			"library":     {"knowledge": 1},
+			"library":     {"knowledge": 0.5},
 		},
 	}
 	return bm
