@@ -322,12 +322,27 @@ func (d *Display) setupUI() {
 	// 	AddItem(leftPanel, 0, 1, false).
 	// 	AddItem(d.rightPanel, 0, 1, false)
 
+	// Add banner panel to the top of the display
+	banner := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignCenter)
+	banner.SetBorder(true).SetTitle("")
+
+	// Banner content: Game name centered, version lower left, creator lower right
+	bannerText := `[::b][#2ecc71]CivIdleCli - A Command Line Civilization Builder[::b]
+` +
+		`[white][v1.0.0][#ffffff]` + strings.Repeat(" ", 60) + `[white]Creator: Espresso[#ffffff]`
+	banner.SetText(bannerText)
+
+	// Add the banner to the top of the dashboard
+	// Adjust dashboard layout to include the banner at the top
 	d.dashboard = tview.NewGrid().
-		SetRows(20, 0).
+		SetRows(5, 20, 0).
 		SetColumns(0).
-		AddItem(leftPanel, 0, 0, 1, 1, 0, 0, false).
-		AddItem(d.rightPanel, 0, 1, 1, 1, 0, 0, false).
-		AddItem(d.output, 1, 0, 1, 1, 0, 0, false)
+		AddItem(banner, 0, 0, 1, 2, 0, 0, false).
+		AddItem(leftPanel, 1, 0, 1, 1, 0, 0, false).
+		AddItem(d.rightPanel, 1, 1, 1, 1, 0, 0, false).
+		AddItem(d.output, 2, 0, 1, 2, 0, 0, false)
 
 	// Create main layout
 	d.mainFlex = tview.NewFlex().
