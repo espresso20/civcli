@@ -34,13 +34,7 @@ type Display struct {
 	// Add CommandHandler reference to Display struct
 	CommandHandler *game.CommandHandler
 
-	// Track tab completion state
-	tabCompletionState struct {
-		shownOptions      bool
-		lastCommand       string
-		selectedOptionIdx int
-		currentOptions    []string
-	}
+	// No longer needed as tab completion uses function-level state tracking
 }
 
 // NewDisplay creates a new display
@@ -549,14 +543,14 @@ func (d *Display) ShowMessage(message string, style string) {
 func (d *Display) ShowAgeAdvancement(newAge string) {
 	// Create a themed modal for age advancement
 	ageColors := map[string]string{
-		"Stone Age":      "gray",    // Gray
-		"Bronze Age":     "orange",  // Bronze/Orange
-		"Iron Age":       "gray",    // Gray-silver
-		"Classical Age":  "yellow",  // Gold
-		"Medieval Age":   "purple",  // Royal purple
-		"Renaissance":    "blue",    // Blue
-		"Industrial Age": "red",     // Red
-		"Modern Age":     "green",   // Green
+		"Stone Age":      "gray",   // Gray
+		"Bronze Age":     "orange", // Bronze/Orange
+		"Iron Age":       "gray",   // Gray-silver
+		"Classical Age":  "yellow", // Gold
+		"Medieval Age":   "purple", // Royal purple
+		"Renaissance":    "blue",   // Blue
+		"Industrial Age": "red",    // Red
+		"Modern Age":     "green",  // Green
 	}
 
 	ageColor := "green" // Default color
