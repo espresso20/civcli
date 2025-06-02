@@ -34,4 +34,6 @@ __pycache__/
 *$py.class
 venv/
 
+# Ignore game saves and wiki repository
 data/saves/
+wiki/
