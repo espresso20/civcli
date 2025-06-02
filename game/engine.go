@@ -105,7 +105,7 @@ func (ge *GameEngine) update() {
 	ge.Tick++
 
 	// Update resources based on villagers and track statistics
-	ge.Villagers.CollectResourcesAndTrack(ge.Resources, ge.Stats)
+	ge.Villagers.CollectResourcesAndTrack(ge.Resources, ge.Stats, ge.Buildings)
 
 	// Update buildings
 	ge.Buildings.Update(ge.Resources)

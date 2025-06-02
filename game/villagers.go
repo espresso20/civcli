@@ -171,7 +171,7 @@ func (vm *VillagerManager) GetFoodConsumption() float64 {
 }
 
 // CollectResources collects resources based on villager assignments
-func (vm *VillagerManager) CollectResources(rm *ResourceManager) {
+func (vm *VillagerManager) CollectResources(rm *ResourceManager, bm *BuildingManager) {
 	for vtype, v := range vm.villagers {
 		for resource, count := range v.Assignment {
 			if resource != "idle" && count > 0 {
@@ -188,6 +188,10 @@ func (vm *VillagerManager) CollectResources(rm *ResourceManager) {
 						collectionRate *= 1.5
 					}
 				}
+
+				// Apply building bonuses
+				buildingBonus := bm.GetCollectionRateBonus(vtype, resource)
+				collectionRate *= (1.0 + buildingBonus)
 
 				amount := float64(count) * collectionRate
 
@@ -203,7 +207,7 @@ func (vm *VillagerManager) CollectResources(rm *ResourceManager) {
 }
 
 // CollectResourcesAndTrack collects resources based on villager assignments and tracks statistics
-func (vm *VillagerManager) CollectResourcesAndTrack(rm *ResourceManager, stats *GameStats) {
+func (vm *VillagerManager) CollectResourcesAndTrack(rm *ResourceManager, stats *GameStats, bm *BuildingManager) {
 	for vtype, v := range vm.villagers {
 		for resource, count := range v.Assignment {
 			if resource != "idle" && count > 0 {
@@ -220,6 +224,10 @@ func (vm *VillagerManager) CollectResourcesAndTrack(rm *ResourceManager, stats *
 						collectionRate *= 1.5
 					}
 				}
+
+				// Apply building bonuses
+				buildingBonus := bm.GetCollectionRateBonus(vtype, resource)
+				collectionRate *= (1.0 + buildingBonus)
 
 				amount := float64(count) * collectionRate
 

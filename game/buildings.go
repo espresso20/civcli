@@ -2,9 +2,10 @@ package game
 
 // BuildingManager handles building construction and effects
 type BuildingManager struct {
-	buildings       map[string]int
-	buildingCosts   map[string]map[string]float64
-	buildingEffects map[string]map[string]float64
+	buildings           map[string]int
+	buildingCosts       map[string]map[string]float64
+	buildingEffects     map[string]map[string]float64
+	buildingRateBonuses map[string]map[string]map[string]float64 // building -> villagerType -> resource -> bonus percentage
 }
 
 // NewBuildingManager creates a new building manager
@@ -33,6 +34,24 @@ func NewBuildingManager() *BuildingManager {
 			"mine":        {"stone": 1, "gold": 0.2},
 			"market":      {"gold": 0.5},
 			"library":     {"knowledge": 0.5},
+		},
+		buildingRateBonuses: map[string]map[string]map[string]float64{
+			"farm": {
+				"villager": {"food": 0.05}, // Villagers get +5% food gathering rate per farm
+			},
+			"lumber_mill": {
+				"villager": {"wood": 0.1}, // Villagers get +10% wood gathering rate per lumber mill
+			},
+			"mine": {
+				"villager": {"stone": 0.05, "gold": 0.05}, // Villagers get +5% stone and gold gathering rate per mine
+			},
+			"market": {
+				"villager": {"gold": 0.1}, // Villagers get +10% gold gathering rate per market
+			},
+			"library": {
+				"scholar":  {"knowledge": 0.15}, // Scholars get +15% knowledge gathering rate per library
+				"villager": {"knowledge": 0.05}, // Villagers get +5% knowledge gathering rate per library
+			},
 		},
 	}
 	return bm
@@ -122,6 +141,7 @@ func (bm *BuildingManager) Update(resources *ResourceManager) {
 			if effects, exists := bm.buildingEffects[building]; exists {
 				for resource, amount := range effects {
 					if resource != "villager_capacity" {
+						// Only add direct resource production here, not collection rate bonuses
 						resources.Add(resource, amount*float64(count))
 					}
 				}
@@ -145,4 +165,26 @@ func (bm *BuildingManager) GetVillagerCapacity() int {
 	}
 
 	return capacity
+}
+
+// GetCollectionRateBonus returns the collection rate bonus for a specific villager type and resource
+func (bm *BuildingManager) GetCollectionRateBonus(villagerType, resource string) float64 {
+	totalBonus := 0.0
+
+	// Check each building for applicable bonuses
+	for building, count := range bm.buildings {
+		if count > 0 {
+			// Check if this building provides bonuses for this villager type
+			if villagerBonuses, exists := bm.buildingRateBonuses[building]; exists {
+				if resourceBonuses, hasVillagerType := villagerBonuses[villagerType]; hasVillagerType {
+					if bonus, hasResource := resourceBonuses[resource]; hasResource {
+						// Apply bonus for each building of this type
+						totalBonus += bonus * float64(count)
+					}
+				}
+			}
+		}
+	}
+
+	return totalBonus
 }
