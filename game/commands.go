@@ -447,6 +447,13 @@ func (ch *CommandHandler) CmdResearch(args []string) {
 		return
 	}
 
+	// Check if the player has any knowledge points
+	knowledgePoints := ch.Game.Resources.Get("knowledge")
+	if knowledgePoints <= 0 {
+		ch.Game.Display.ShowMessage("You cannot research any technology without knowledge points. Assign villagers to gather knowledge.", "error")
+		return
+	}
+
 	// Start research
 	if ch.Game.Research.StartResearch(techName, 0) {
 		ch.Game.Display.ShowMessage("Started researching "+techName, "success")
@@ -464,6 +471,12 @@ func (ch *CommandHandler) CmdTechs() {
 	if len(availableTechs) == 0 {
 		ch.Game.Display.ShowMessage("No technologies available for research in the "+ch.Game.Age, "info")
 		return
+	}
+
+	// Check if the player has any knowledge points
+	knowledgePoints := ch.Game.Resources.Get("knowledge")
+	if knowledgePoints <= 0 {
+		ch.Game.Display.ShowMessage("Note: You need knowledge points to start researching. Assign villagers to gather knowledge.", "warning")
 	}
 
 	// Display available technologies
