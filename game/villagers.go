@@ -26,11 +26,12 @@ func NewVillagerManager() *VillagerManager {
 		Count:    0,
 		FoodCost: 3,
 		Assignment: VillagerAssignment{
-			"food":  0,
-			"wood":  0,
-			"stone": 0,
-			"gold":  0,
-			"idle":  0,
+			"food":      0,
+			"wood":      0,
+			"stone":     0,
+			"gold":      0,
+			"knowledge": 0,
+			"idle":      0,
 		},
 	}
 
@@ -171,11 +172,23 @@ func (vm *VillagerManager) GetFoodConsumption() float64 {
 
 // CollectResources collects resources based on villager assignments
 func (vm *VillagerManager) CollectResources(rm *ResourceManager) {
-	for _, v := range vm.villagers {
+	for vtype, v := range vm.villagers {
 		for resource, count := range v.Assignment {
 			if resource != "idle" && count > 0 {
 				// Calculate collection amount
 				collectionRate := rm.GetCollectionRate(resource)
+
+				// Apply villager-specific modifiers
+				if resource == "knowledge" {
+					if vtype == "villager" {
+						// Regular villagers gather knowledge at 20% of the normal rate
+						collectionRate *= 0.2
+					} else if vtype == "scholar" {
+						// Scholars gather knowledge at 150% of the normal rate
+						collectionRate *= 1.5
+					}
+				}
+
 				amount := float64(count) * collectionRate
 
 				// Add the resources
@@ -191,11 +204,23 @@ func (vm *VillagerManager) CollectResources(rm *ResourceManager) {
 
 // CollectResourcesAndTrack collects resources based on villager assignments and tracks statistics
 func (vm *VillagerManager) CollectResourcesAndTrack(rm *ResourceManager, stats *GameStats) {
-	for _, v := range vm.villagers {
+	for vtype, v := range vm.villagers {
 		for resource, count := range v.Assignment {
 			if resource != "idle" && count > 0 {
 				// Calculate collection amount
 				collectionRate := rm.GetCollectionRate(resource)
+
+				// Apply villager-specific modifiers
+				if resource == "knowledge" {
+					if vtype == "villager" {
+						// Regular villagers gather knowledge at 20% of the normal rate
+						collectionRate *= 0.2
+					} else if vtype == "scholar" {
+						// Scholars gather knowledge at 150% of the normal rate
+						collectionRate *= 1.5
+					}
+				}
+
 				amount := float64(count) * collectionRate
 
 				// Add the resources
