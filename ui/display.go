@@ -98,7 +98,8 @@ func (d *Display) setupUI() {
 			}
 		}
 
-		// Display suggestions (this can be enhanced with a dropdown or similar UI)
+		// Display suggestions
+		// TODO: (this can be enhanced with a dropdown or similar UI)
 		if len(suggestions) > 0 {
 			d.output.Clear()
 			for _, suggestion := range suggestions {
