@@ -69,7 +69,7 @@ func (d *Display) setupUI() {
 	d.input = tview.NewInputField().
 		SetLabel("> ").
 		SetFieldWidth(0).
-		SetFieldTextColor(tcell.ColorLightGray).   // Set input text color to light gray
+		SetFieldTextColor(tcell.ColorWhite).
 		SetFieldBackgroundColor(tcell.ColorBlack). // Set input background to black
 		SetDoneFunc(func(key tcell.Key) {
 			if key == tcell.KeyEnter {
