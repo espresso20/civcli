@@ -13,7 +13,9 @@ In CivIdleCli, you start with a small tribe in the Stone Age. Your goal is to ga
 - **Building System**: Construct various buildings that provide bonuses and unlock new capabilities
 - **Age Progression**: Advance through different ages, from Stone Age to Modern Age
 - **Command-based Interface**: Simple text commands with auto-completion
-- **Rich Terminal UI**: Colorful and informative terminal interface
+- **Rich Terminal UI**: Colorful and informative terminal interface with live updates
+- **True Idle Gameplay**: Progress continues automatically based on real-world time, even when you're away
+- **Live Stats Display**: Watch your resources accumulate in real-time without entering commands
 - **Distributable Binary**: Built with Go, can be distributed as a single binary file
 
 ## Installation

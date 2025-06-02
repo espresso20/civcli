@@ -22,6 +22,8 @@ type GameEngine struct {
 	Stats          *GameStats
 	TickDuration   time.Duration
 	LastUpdateTime time.Time
+	RefreshRate    time.Duration // How often to refresh the UI
+	stopRefresh    chan bool     // Channel to signal stopping the UI refresh
 }
 
 // DisplayInterface defines the interface for the UI display
@@ -46,6 +48,8 @@ func NewGameEngine(display DisplayInterface) *GameEngine {
 		Age:            "Stone Age",
 		TickDuration:   5 * time.Second,
 		LastUpdateTime: time.Now(),
+		RefreshRate:    5 * time.Second, // Match refresh rate to tick duration
+		stopRefresh:    make(chan bool), // Initialize the stop channel
 	}
 
 	// Initialize game components
@@ -79,28 +83,45 @@ func (ge *GameEngine) initializeGame() {
 // Start starts the main game loop
 func (ge *GameEngine) Start() error {
 	ge.Running = true
+
+	// Start the UI refresh loop
+	go ge.refreshLoop()
+
 	return ge.mainLoop()
+}
+
+// refreshLoop handles the periodic refreshing of the UI
+func (ge *GameEngine) refreshLoop() {
+	ticker := time.NewTicker(ge.RefreshRate)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			// Calculate elapsed ticks since last update
+			elapsedTicks := ge.calculateElapsedTicks()
+
+			// Process those ticks
+			ge.updateMultipleTicks(elapsedTicks)
+
+			// Refresh the display
+			ge.Display.DisplayDashboard(ge.GetGameState())
+		case <-ge.stopRefresh:
+			return
+		}
+	}
 }
 
 // mainLoop is the main game loop
 func (ge *GameEngine) mainLoop() error {
 	for ge.Running {
-		// Calculate elapsed ticks since last update
-		elapsedTicks := ge.calculateElapsedTicks()
-
-		// Process those ticks
-		ge.updateMultipleTicks(elapsedTicks)
-
-		// Display the dashboard
-		ge.Display.DisplayDashboard(ge.GetGameState())
-
 		// Get user command
 		userInput, err := ge.Display.GetInput()
 		if err != nil {
 			return errors.New("error getting user input: " + err.Error())
 		}
 
-		// Process command (but don't update ticks again - that's handled by time now)
+		// Process command (ticks are now handled by the refresh loop)
 		ge.Commands.Process(userInput)
 	}
 	return nil
@@ -174,6 +195,9 @@ func (ge *GameEngine) updateMultipleTicks(tickCount int) {
 // Quit quits the game
 func (ge *GameEngine) Quit() {
 	ge.Display.ShowMessage("Goodbye! Thanks for playing CivIdleCli!", "warning")
+
+	// Signal the refresh loop to stop
+	close(ge.stopRefresh)
 
 	// Sleep briefly to allow the message to be displayed
 	time.Sleep(500 * time.Millisecond)

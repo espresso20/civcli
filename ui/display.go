@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -28,6 +29,7 @@ type Display struct {
 	research   *tview.TextView
 	inputChan  chan string
 	rightPanel *tview.Flex
+	mutex      sync.Mutex // Mutex for thread safety
 
 	// Add CommandHandler reference to Display struct
 	CommandHandler *game.CommandHandler
@@ -571,10 +573,16 @@ New buildings, technologies, and opportunities await you.
 
 // DisplayDashboard updates the dashboard with current game state
 func (d *Display) DisplayDashboard(gameState game.GameState) {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
 	// Update status info
 	d.status.Clear()
 	d.status.Write([]byte(fmt.Sprintf("[#3498db]Age:[#ffffff] %s\n", gameState.Age)))
 	d.status.Write([]byte(fmt.Sprintf("[#3498db]Tick:[#ffffff] %d\n", gameState.Tick)))
+
+	// Force draw to ensure status gets updated
+	d.app.Draw()
 
 	// Calculate total villagers and display housing capacity
 	totalVillagers := 0
