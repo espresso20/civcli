@@ -330,9 +330,9 @@ func (d *Display) setupUI() {
 	banner.SetBorder(true).SetTitle("")
 
 	// Banner content: Game name centered, version lower left, creator lower right
-	bannerText := `[::b][#2ecc71]CivIdleCli - A Command Line Civilization Builder[::b]
+	bannerText := `[::b][green]CivIdleCli - A Command Line Civilization Builder[::b]
 ` +
-		`[white][v1.0.0][#ffffff]` + strings.Repeat(" ", 60) + `[white]Creator: Espresso[#ffffff]`
+		`[white][v1.0.0][::d]` + strings.Repeat(" ", 60) + `[white]Creator: Espresso[::d]`
 	banner.SetText(bannerText)
 
 	// Add the banner to the top of the dashboard
@@ -357,22 +357,22 @@ func (d *Display) setupUI() {
 		SetTextAlign(tview.AlignCenter).
 		SetScrollable(false) // Disable scrolling to show all content at once
 	introText.SetText(`
-[::b][#2ecc71]CivIdleCli - A Command Line Civilization Builder Game[#ffffff][::b]
+[::b][green]CivIdleCli - A Command Line Civilization Builder Game[::d][::b]
 
-[#3498db]Welcome to CivIdleCli![#ffffff] You are the leader of a small tribe in the Stone Age.
+[blue]Welcome to CivIdleCli![::d] You are the leader of a small tribe in the Stone Age.
 
-[#f1c40f]Your Mission:[#ffffff]
+[yellow]Your Mission:[::d]
 - Gather resources to survive and grow
 - Build structures to advance your civilization
 - Research technologies to unlock new possibilities
 - Assign villagers efficiently to different tasks
 - Guide your people through the ages of history
 
-[#e74c3c]Type 'help' at any time to see available commands.[#ffffff]
+[red]Type 'help' at any time to see available commands.[::d]
 
-[#e74c3c]You can read the wiki library for further knowledge on how to play.[#ffffff]
+[red]You can read the wiki library for further knowledge on how to play.[::d]
 
-[::b][#2ecc71]Press Enter to begin your journey...[#ffffff][::b]
+[::b][green]Press Enter to begin your journey...[::d][::b]
 	`)
 
 	introPage := tview.NewFlex().
@@ -497,9 +497,9 @@ func (d *Display) ShowHelp(commands map[string]string) {
 	// Display commands by category
 	for category, cmds := range commandCategories {
 		if len(cmds) > 0 {
-			d.output.Write([]byte(fmt.Sprintf("[#3498db]%s Commands:[#ffffff]\n", category)))
+			d.output.Write([]byte(fmt.Sprintf("[blue]%s Commands:[::d]\n", category)))
 			for cmd, desc := range cmds {
-				line := fmt.Sprintf("  [#f1c40f]%s[#ffffff]: %s\n", cmd, desc)
+				line := fmt.Sprintf("  [yellow]%s[::d]: %s\n", cmd, desc)
 				d.output.Write([]byte(line))
 			}
 			d.output.Write([]byte("\n"))
@@ -507,9 +507,9 @@ func (d *Display) ShowHelp(commands map[string]string) {
 	}
 
 	// Add keyboard shortcuts
-	d.output.Write([]byte("[#3498db]Keyboard Shortcuts:[#ffffff]\n"))
-	d.output.Write([]byte("  [#f1c40f]ESC[#ffffff]: Return focus to command input\n"))
-	d.output.Write([]byte("  [#f1c40f]F1[#ffffff]: Show this help screen\n"))
+	d.output.Write([]byte("[blue]Keyboard Shortcuts:[::d]\n"))
+	d.output.Write([]byte("  [yellow]ESC[::d]: Return focus to command input\n"))
+	d.output.Write([]byte("  [yellow]F1[::d]: Show this help screen\n"))
 }
 
 // ShowMessage displays a message to the player
@@ -519,26 +519,26 @@ func (d *Display) ShowMessage(message string, style string) {
 
 	switch style {
 	case "info":
-		color = "#3498db" // Blue
+		color = "blue" // Blue
 		prefix = "[i] "
 	case "success":
-		color = "#2ecc71" // Green
+		color = "green" // Green
 		prefix = "[+] "
 	case "warning":
-		color = "#f1c40f" // Yellow
+		color = "yellow" // Yellow
 		prefix = "[!] "
 	case "error":
-		color = "#e74c3c" // Red
+		color = "red" // Red
 		prefix = "[x] "
 	case "highlight":
-		color = "#9b59b6" // Purple
+		color = "purple" // Purple
 		prefix = "[*] "
 	default:
-		color = "#ffffff" // White
+		color = "::d" // Default color
 		prefix = ""
 	}
 
-	formattedMessage := fmt.Sprintf("[%s]%s%s[#ffffff]", color, prefix, message)
+	formattedMessage := fmt.Sprintf("[%s]%s%s[::d]", color, prefix, message)
 	d.output.Write([]byte(formattedMessage + "\n"))
 
 	// Auto-scroll to the bottom
@@ -549,26 +549,26 @@ func (d *Display) ShowMessage(message string, style string) {
 func (d *Display) ShowAgeAdvancement(newAge string) {
 	// Create a themed modal for age advancement
 	ageColors := map[string]string{
-		"Stone Age":      "#7f8c8d", // Gray
-		"Bronze Age":     "#d35400", // Bronze/Orange
-		"Iron Age":       "#7f8c8d", // Gray-silver
-		"Classical Age":  "#f1c40f", // Gold
-		"Medieval Age":   "#8e44ad", // Royal purple
-		"Renaissance":    "#3498db", // Blue
-		"Industrial Age": "#e74c3c", // Red
-		"Modern Age":     "#2ecc71", // Green
+		"Stone Age":      "gray",    // Gray
+		"Bronze Age":     "orange",  // Bronze/Orange
+		"Iron Age":       "gray",    // Gray-silver
+		"Classical Age":  "yellow",  // Gold
+		"Medieval Age":   "purple",  // Royal purple
+		"Renaissance":    "blue",    // Blue
+		"Industrial Age": "red",     // Red
+		"Modern Age":     "green",   // Green
 	}
 
-	ageColor := "#2ecc71" // Default color
+	ageColor := "green" // Default color
 	if color, ok := ageColors[newAge]; ok {
 		ageColor = color
 	}
 
 	messageText := fmt.Sprintf(`
-[::b][#ffffff]CIVILIZATION ADVANCEMENT[::b]
+[::b][::d]CIVILIZATION ADVANCEMENT[::b]
 
 Congratulations! Your civilization has advanced to the 
-[::b][%s]%s[#ffffff][::b]
+[::b][%s]%s[::d][::b]
 
 New buildings, technologies, and opportunities await you.
 `, ageColor, newAge)
@@ -597,9 +597,9 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 
 	// Update status info
 	d.status.Clear()
-	d.status.Write([]byte(fmt.Sprintf("[#3498db]Age:[#ffffff] %s\n", gameState.Age)))
-	d.status.Write([]byte(fmt.Sprintf("[#3498db]Tick:[#ffffff] %d\n", gameState.Tick)))
-	d.status.Write([]byte(fmt.Sprintf("[#3498db]Tick Rate:[#ffffff] %.1fs per tick\n", gameState.TickDurationSeconds)))
+	d.status.Write([]byte(fmt.Sprintf("[blue]Age:[::d] %s\n", gameState.Age)))
+	d.status.Write([]byte(fmt.Sprintf("[blue]Tick:[::d] %d\n", gameState.Tick)))
+	d.status.Write([]byte(fmt.Sprintf("[blue]Tick Rate:[::d] %.1fs per tick\n", gameState.TickDurationSeconds)))
 
 	// Force draw to ensure status gets updated
 	d.app.Draw()
@@ -609,21 +609,21 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 	for _, v := range gameState.Villagers {
 		totalVillagers += v.Count
 	}
-	capacityColor := "#2ecc71" // Green by default
+	capacityColor := "green" // Green by default
 	if totalVillagers >= gameState.VillagerCap {
-		capacityColor = "#e74c3c" // Red if at capacity
+		capacityColor = "red" // Red if at capacity
 	} else if float64(totalVillagers) >= float64(gameState.VillagerCap)*0.8 {
-		capacityColor = "#f1c40f" // Yellow if close to capacity
+		capacityColor = "yellow" // Yellow if close to capacity
 	}
 
-	d.status.Write([]byte(fmt.Sprintf("[#3498db]Housing:[#ffffff] %d/[%s]%d[#ffffff]\n",
+	d.status.Write([]byte(fmt.Sprintf("[blue]Housing:[::d] %d/[%s]%d[::d]\n",
 		totalVillagers, capacityColor, gameState.VillagerCap)))
 
 	// Show housing buildings available in the current age
 	housingBuildings := []string{"hut"} // Only huts provide housing in this game
 	for _, building := range housingBuildings {
 		if count, exists := gameState.Buildings[building]; exists {
-			d.status.Write([]byte(fmt.Sprintf("  [#3498db]%s:[#ffffff] %d\n",
+			d.status.Write([]byte(fmt.Sprintf("  [blue]%s:[::d] %d\n",
 				formatBuildingName(building), count)))
 		}
 	}
@@ -634,17 +634,17 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 		progressPercent := (gameState.Research.Progress / gameState.Research.Cost) * 100
 		progressBar := createProgressBar(progressPercent, 20)
 
-		d.research.Write([]byte(fmt.Sprintf("[#3498db]Researching:[#ffffff] %s\n", gameState.Research.Current)))
-		d.research.Write([]byte(fmt.Sprintf("[#3498db]Progress:[#ffffff] %s %.1f%%\n",
+		d.research.Write([]byte(fmt.Sprintf("[blue]Researching:[::d] %s\n", gameState.Research.Current)))
+		d.research.Write([]byte(fmt.Sprintf("[blue]Progress:[::d] %s %.1f%%\n",
 			progressBar, progressPercent)))
 
 		// Show completed research if any
 		if len(gameState.Research.Researched) > 0 {
-			d.research.Write([]byte(fmt.Sprintf("[#3498db]Completed:[#ffffff] %d technologies\n",
+			d.research.Write([]byte(fmt.Sprintf("[blue]Completed:[::d] %d technologies\n",
 				len(gameState.Research.Researched))))
 		}
 	} else {
-		d.research.Write([]byte("[#f1c40f]No active research[#ffffff]\n"))
+		d.research.Write([]byte("[yellow]No active research[::d]\n"))
 		d.research.Write([]byte("Use 'research <technology>' command to start researching\n"))
 	}
 
@@ -682,7 +682,7 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 		}
 
 		// Choose color based on amount
-		resourceColor := tcell.ColorWhite
+		resourceColor := tcell.ColorDefault
 		if amount <= 5 {
 			resourceColor = tcell.ColorRed
 		} else if amount <= 20 {
@@ -719,7 +719,7 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 		}
 
 		// Choose color based on amount
-		resourceColor := tcell.ColorWhite
+		resourceColor := tcell.ColorDefault
 		if amount <= 5 {
 			resourceColor = tcell.ColorRed
 		} else if amount <= 20 {
@@ -805,7 +805,7 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 			}
 
 			// Add assignments to the table
-			cellColor := tcell.ColorWhite
+			cellColor := tcell.ColorDefault
 			if idleCount > 0 && idleCount == info.Count {
 				cellColor = tcell.ColorYellow // All idle
 			}
@@ -873,7 +873,7 @@ func (d *Display) ShowLibraryContent(title, content string) {
 	d.output.Write([]byte(fmt.Sprintf("[::b]%s[::b]\n\n", title)))
 	d.output.SetTextColor(tcell.ColorWhite)
 	d.output.Write([]byte(content + "\n"))
-	d.output.Write([]byte("\n[#f1c40f]Type 'library' to see all topics, or 'library <topic>' to view another topic.[#ffffff]\n"))
+	d.output.Write([]byte("\n[yellow]Type 'library' to see all topics, or 'library <topic>' to view another topic.[::d]\n"))
 	// Always restore input field focus
 	d.app.SetFocus(d.input)
 }
@@ -892,9 +892,9 @@ func (d *Display) ShowLibraryTopicsList(topics map[string]string) {
 	sort.Strings(sortedIDs)
 
 	for _, id := range sortedIDs {
-		d.output.Write([]byte(fmt.Sprintf("  [#f1c40f]%s[#ffffff]: %s\n", id, topics[id])))
+		d.output.Write([]byte(fmt.Sprintf("  [yellow]%s[::d]: %s\n", id, topics[id])))
 	}
-	d.output.Write([]byte("\n[#f1c40f]Type 'library <topic>' to view details about a topic.[#ffffff]\n"))
+	d.output.Write([]byte("\n[yellow]Type 'library <topic>' to view details about a topic.[::d]\n"))
 	d.app.SetFocus(d.input)
 }
 
