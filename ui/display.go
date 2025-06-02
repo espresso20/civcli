@@ -354,7 +354,8 @@ func (d *Display) setupUI() {
 	// Create intro page with improved styling
 	introText := tview.NewTextView().
 		SetDynamicColors(true).
-		SetTextAlign(tview.AlignCenter)
+		SetTextAlign(tview.AlignCenter).
+		SetScrollable(false) // Disable scrolling to show all content at once
 	introText.SetText(`
 [::b][#2ecc71]CivIdleCli - A Command Line Civilization Builder Game[#ffffff][::b]
 
@@ -369,6 +370,8 @@ func (d *Display) setupUI() {
 
 [#e74c3c]Type 'help' at any time to see available commands.[#ffffff]
 
+[#e74c3c]You can read the wiki library for further knowledge on how to play.[#ffffff]
+
 [::b][#2ecc71]Press Enter to begin your journey...[#ffffff][::b]
 	`)
 
@@ -377,7 +380,7 @@ func (d *Display) setupUI() {
 		AddItem(tview.NewFlex().
 			SetDirection(tview.FlexRow).
 			AddItem(nil, 0, 1, false).
-			AddItem(introText, 15, 1, false).
+			AddItem(introText, 20, 1, false).
 			AddItem(nil, 0, 1, false), 70, 1, true).
 		AddItem(nil, 0, 1, false)
 
