@@ -2,24 +2,26 @@ package game
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
 // GameEngine represents the main game state and logic
 type GameEngine struct {
-	Display      DisplayInterface
-	Running      bool
-	Tick         int
-	Age          string
-	Resources    *ResourceManager
-	Buildings    *BuildingManager
-	Villagers    *VillagerManager
-	Progress     *ProgressManager
-	Research     *ResearchManager
-	Library      *LibrarySystem
-	Commands     *CommandHandler
-	Stats        *GameStats
-	TickDuration time.Duration
+	Display        DisplayInterface
+	Running        bool
+	Tick           int
+	Age            string
+	Resources      *ResourceManager
+	Buildings      *BuildingManager
+	Villagers      *VillagerManager
+	Progress       *ProgressManager
+	Research       *ResearchManager
+	Library        *LibrarySystem
+	Commands       *CommandHandler
+	Stats          *GameStats
+	TickDuration   time.Duration
+	LastUpdateTime time.Time
 }
 
 // DisplayInterface defines the interface for the UI display
@@ -38,11 +40,12 @@ type DisplayInterface interface {
 // NewGameEngine creates a new game engine
 func NewGameEngine(display DisplayInterface) *GameEngine {
 	ge := &GameEngine{
-		Display:      display,
-		Running:      false,
-		Tick:         0,
-		Age:          "Stone Age",
-		TickDuration: 5 * time.Second,
+		Display:        display,
+		Running:        false,
+		Tick:           0,
+		Age:            "Stone Age",
+		TickDuration:   5 * time.Second,
+		LastUpdateTime: time.Now(),
 	}
 
 	// Initialize game components
@@ -82,6 +85,12 @@ func (ge *GameEngine) Start() error {
 // mainLoop is the main game loop
 func (ge *GameEngine) mainLoop() error {
 	for ge.Running {
+		// Calculate elapsed ticks since last update
+		elapsedTicks := ge.calculateElapsedTicks()
+
+		// Process those ticks
+		ge.updateMultipleTicks(elapsedTicks)
+
 		// Display the dashboard
 		ge.Display.DisplayDashboard(ge.GetGameState())
 
@@ -91,17 +100,31 @@ func (ge *GameEngine) mainLoop() error {
 			return errors.New("error getting user input: " + err.Error())
 		}
 
-		// Process command
+		// Process command (but don't update ticks again - that's handled by time now)
 		ge.Commands.Process(userInput)
-
-		// Update game state (process one tick)
-		ge.update()
 	}
 	return nil
 }
 
-// update updates the game state for one tick
-func (ge *GameEngine) update() {
+// calculateElapsedTicks calculates how many ticks have passed since the last update
+func (ge *GameEngine) calculateElapsedTicks() int {
+	now := time.Now()
+	elapsedTime := now.Sub(ge.LastUpdateTime)
+	elapsedTicks := int(elapsedTime.Seconds() / ge.TickDuration.Seconds())
+
+	// Ensure we process at least one tick when the player interacts
+	if elapsedTicks < 1 {
+		elapsedTicks = 1
+	}
+
+	// Update the last update time
+	ge.LastUpdateTime = now
+
+	return elapsedTicks
+}
+
+// updateSingleTick processes a single tick of game time
+func (ge *GameEngine) updateSingleTick() {
 	ge.Tick++
 
 	// Update resources based on villagers and track statistics
@@ -128,6 +151,23 @@ func (ge *GameEngine) update() {
 		// Track age advancement in stats
 		ge.Stats.AddEvent(ge.Tick, "age_advancement", "Advanced to "+newAge)
 		ge.Stats.AddAgeReached(newAge)
+	}
+}
+
+// updateMultipleTicks processes multiple ticks at once
+func (ge *GameEngine) updateMultipleTicks(tickCount int) {
+	// For large tick counts (e.g. after long absence), limit to a reasonable number
+	// to prevent excessive processing and resource accumulation
+	maxTicksAtOnce := 1000 // Process at most 1000 ticks at once
+	if tickCount > maxTicksAtOnce {
+		ge.Display.ShowMessage(fmt.Sprintf("Processing %d ticks (capped from %d)...", maxTicksAtOnce, tickCount), "info")
+		tickCount = maxTicksAtOnce
+	} else if tickCount > 10 {
+		ge.Display.ShowMessage(fmt.Sprintf("Processing %d ticks...", tickCount), "info")
+	}
+
+	for i := 0; i < tickCount; i++ {
+		ge.updateSingleTick()
 	}
 }
 

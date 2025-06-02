@@ -17,7 +17,7 @@ func NewResourceManager() *ResourceManager {
 			"knowledge": 0,
 		},
 		collectionRates: map[string]float64{
-			"food":      2.3,  // Increased to ensure 1 villager can sustain themselves at start
+			"food":      2.3, // Increased to ensure 1 villager can sustain themselves at start
 			"wood":      1.0,
 			"stone":     0.5,
 			"gold":      0.2,

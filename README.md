@@ -60,6 +60,8 @@ go build -o cividlecli
 7. Unlock new buildings, resources, and villager types
 8. Reach the Modern Age and build an advanced civilization
 
+Progress continues automatically even when you're not playing, making this a true idle game where your civilization grows over time.
+
 ## Requirements
 
 - To build from source: Go 1.21 or higher
