@@ -74,7 +74,7 @@ func NewGameEngine(display DisplayInterface) *GameEngine {
 func (ge *GameEngine) initializeGame() {
 	// Add initial resources
 	ge.Resources.Add("food", 20)
-	ge.Resources.Add("wood", 15)
+	ge.Resources.Add("wood", 20)
 
 	// Start with one villager
 	ge.Villagers.Add("villager", 1)
