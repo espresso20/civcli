@@ -29,7 +29,7 @@ func NewBuildingManager() *BuildingManager {
 		},
 		buildingEffects: map[string]map[string]float64{
 			"hut":         {"villager_capacity": 2},
-			"farm":        {"food": 2},
+			"farm":        {"food": 3.5},  // Increased from 2 to improve food production
 			"lumber_mill": {"wood": 2},
 			"mine":        {"stone": 1, "gold": 0.2},
 			"market":      {"gold": 0.5},
@@ -37,7 +37,7 @@ func NewBuildingManager() *BuildingManager {
 		},
 		buildingRateBonuses: map[string]map[string]map[string]float64{
 			"farm": {
-				"villager": {"food": 0.05}, // Villagers get +5% food gathering rate per farm
+				"villager": {"food": 0.08}, // Increased from 0.05 to improve food gathering efficiency
 			},
 			"lumber_mill": {
 				"villager": {"wood": 0.1}, // Villagers get +10% wood gathering rate per lumber mill

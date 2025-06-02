@@ -24,7 +24,7 @@ func NewVillagerManager() *VillagerManager {
 	// Initialize default villager types
 	vm.villagers["villager"] = &VillagerType{
 		Count:    0,
-		FoodCost: 3,
+		FoodCost: 2.1,  // Adjusted to work better with starting villager
 		Assignment: VillagerAssignment{
 			"food":      0,
 			"wood":      0,
@@ -37,7 +37,7 @@ func NewVillagerManager() *VillagerManager {
 
 	vm.villagers["scholar"] = &VillagerType{
 		Count:    0,
-		FoodCost: 5,
+		FoodCost: 4.5,  // Adjusted from 5 to keep scholar more expensive than villager
 		Assignment: VillagerAssignment{
 			"knowledge": 0,
 			"idle":      0,
