@@ -50,7 +50,7 @@ func NewBuildingManager() *BuildingManager {
 			},
 			"library": {
 				"scholar":  {"knowledge": 0.15}, // Scholars get +15% knowledge gathering rate per library
-				"villager": {"knowledge": 0.05}, // Villagers get +5% knowledge gathering rate per library
+				"villager": {"knowledge": 0.02}, // Villagers get +2% knowledge gathering rate per library
 			},
 		},
 	}
