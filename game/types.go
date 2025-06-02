@@ -14,6 +14,7 @@ type GameState struct {
 		Cost       float64
 		Researched []string
 	}
+	TickDurationSeconds float64 // Add tick duration (seconds per tick) for UI display
 }
 
 // GameStateProvider defines an interface for accessing game state information
@@ -55,5 +56,6 @@ func (ge *GameEngine) GetGameState() GameState {
 			Cost:       cost,
 			Researched: researched,
 		},
+		TickDurationSeconds: ge.TickDuration.Seconds(), // Pass tick duration to UI
 	}
 }

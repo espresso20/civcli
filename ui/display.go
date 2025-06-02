@@ -580,6 +580,7 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 	d.status.Clear()
 	d.status.Write([]byte(fmt.Sprintf("[#3498db]Age:[#ffffff] %s\n", gameState.Age)))
 	d.status.Write([]byte(fmt.Sprintf("[#3498db]Tick:[#ffffff] %d\n", gameState.Tick)))
+	d.status.Write([]byte(fmt.Sprintf("[#3498db]Tick Rate:[#ffffff] %.1fs per tick\n", gameState.TickDurationSeconds)))
 
 	// Force draw to ensure status gets updated
 	d.app.Draw()
