@@ -643,9 +643,61 @@ func (d *Display) DisplayDashboard(gameState game.GameState) {
 		Attributes: tcell.AttrBold,
 	})
 
-	// Add actual resources
+	// Define a fixed order for resources
+	resourceOrder := []string{
+		"food",
+		"wood",
+		"stone",
+		"gold",
+		"knowledge",
+		// Add any other resources that might be added later
+	}
+
+	// Add resources in the fixed order
 	i := 1
+	for _, resource := range resourceOrder {
+		amount, exists := gameState.Resources[resource]
+		if !exists {
+			continue // Skip if the resource doesn't exist yet
+		}
+
+		// Choose color based on amount
+		resourceColor := tcell.ColorWhite
+		if amount <= 5 {
+			resourceColor = tcell.ColorRed
+		} else if amount <= 20 {
+			resourceColor = tcell.ColorYellow
+		} else {
+			resourceColor = tcell.ColorGreen
+		}
+
+		d.resources.SetCell(i, 0, &tview.TableCell{
+			Text:  resource,
+			Align: tview.AlignLeft,
+		})
+		d.resources.SetCell(i, 1, &tview.TableCell{
+			Text:  strconv.FormatFloat(amount, 'f', 1, 64),
+			Align: tview.AlignRight,
+			Color: resourceColor,
+		})
+		i++
+	}
+
+	// Add any resources that weren't in our predefined list
+	// This ensures we don't miss any new resources added in the future
 	for resource, amount := range gameState.Resources {
+		// Skip resources we've already displayed
+		isKnownResource := false
+		for _, knownResource := range resourceOrder {
+			if resource == knownResource {
+				isKnownResource = true
+				break
+			}
+		}
+		if isKnownResource {
+			continue
+		}
+
 		// Choose color based on amount
 		resourceColor := tcell.ColorWhite
 		if amount <= 5 {
