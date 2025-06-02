@@ -29,7 +29,8 @@ type Display struct {
 	research   *tview.TextView
 	inputChan  chan string
 	rightPanel *tview.Flex
-	mutex      sync.Mutex // Mutex for thread safety
+	banner     *tview.TextView // Add banner as a member
+	mutex      sync.Mutex      // Mutex for thread safety
 
 	// Add CommandHandler reference to Display struct
 	CommandHandler *game.CommandHandler
@@ -318,23 +319,24 @@ func (d *Display) setupUI() {
 	// 	AddItem(d.rightPanel, 0, 1, false)
 
 	// Add banner panel to the top of the display
-	banner := tview.NewTextView().
+	d.banner = tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter)
-	banner.SetBorder(true).SetTitle("")
+	d.banner.SetBorder(true).SetTitle("")
 
 	// Banner content: Game name centered, version lower left, creator lower right
 	bannerText := `[::b][green]CivIdleCli - A Command Line Civilization Builder[::b]
+
 ` +
 		`[white][v1.0.0][::d]` + strings.Repeat(" ", 60) + `[white]Creator: Espresso[::d]`
-	banner.SetText(bannerText)
+	d.banner.SetText(bannerText)
 
 	// Add the banner to the top of the dashboard
 	// Adjust dashboard layout to include the banner at the top
 	d.dashboard = tview.NewGrid().
-		SetRows(5, 20, 0).
+		SetRows(8, 20, 0). // Increase banner height from 5 to 8
 		SetColumns(0).
-		AddItem(banner, 0, 0, 1, 2, 0, 0, false).
+		AddItem(d.banner, 0, 0, 1, 2, 0, 0, false).
 		AddItem(leftPanel, 1, 0, 1, 1, 0, 0, false).
 		AddItem(d.rightPanel, 1, 1, 1, 1, 0, 0, false).
 		AddItem(d.output, 2, 0, 1, 2, 0, 0, false)
@@ -588,6 +590,64 @@ New buildings, technologies, and opportunities await you.
 func (d *Display) DisplayDashboard(gameState game.GameState) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
+
+	// Update banner with age information
+	currentAge := gameState.Age
+
+	// Format the current age section with age-specific color
+	ageColor := "green" // Default color
+	ageColors := map[string]string{
+		"Stone Age":      "gray",   // Gray
+		"Bronze Age":     "orange", // Bronze/Orange
+		"Iron Age":       "gray",   // Gray-silver
+		"Classical Age":  "yellow", // Gold
+		"Medieval Age":   "purple", // Royal purple
+		"Renaissance":    "blue",   // Blue
+		"Industrial Age": "red",    // Red
+		"Modern Age":     "green",  // Green
+	}
+
+	if color, ok := ageColors[currentAge]; ok {
+		ageColor = color
+	}
+
+	// Create banner content with age information
+	bannerText := "[::b][green]CivIdleCli - A Command Line Civilization Builder[::b]\n\n"
+	bannerText += fmt.Sprintf("[%s]Current Age: [::b]%s[::b][::d]\n", ageColor, currentAge)
+
+	// Add simplified next age requirements based on current age
+	switch currentAge {
+	case "Stone Age":
+		bannerText += "[yellow]Next Age:[::d] [orange]Bronze Age[::d]\n"
+		bannerText += "[yellow]Requirements:[::d] 3 Huts, 50 Wood, 30 Stone"
+	case "Bronze Age":
+		bannerText += "[yellow]Next Age:[::d] [gray]Iron Age[::d]\n"
+		bannerText += "[yellow]Requirements:[::d] 2 Farms, 2 Mines, 100 Food, 80 Stone"
+	case "Iron Age":
+		bannerText += "[yellow]Next Age:[::d] [yellow]Classical Age[::d]\n"
+		bannerText += "[yellow]Requirements:[::d] 1 Market, 1 Library, 50 Gold, 30 Knowledge"
+	case "Classical Age":
+		bannerText += "[yellow]Next Age:[::d] [purple]Medieval Age[::d]\n"
+		bannerText += "[yellow]Requirements:[::d] 1 Temple, 1 Workshop, 150 Gold, 100 Knowledge"
+	case "Medieval Age":
+		bannerText += "[yellow]Next Age:[::d] [blue]Renaissance[::d]\n"
+		bannerText += "[yellow]Requirements:[::d] 1 University, 300 Gold, 200 Knowledge"
+	case "Renaissance":
+		bannerText += "[yellow]Next Age:[::d] [red]Industrial Age[::d]\n"
+		bannerText += "[yellow]Requirements:[::d] 1 Factory, 500 Gold, 400 Knowledge"
+	case "Industrial Age":
+		bannerText += "[yellow]Next Age:[::d] [green]Modern Age[::d]\n"
+		bannerText += "[yellow]Requirements:[::d] 1 Laboratory, 1000 Gold, 800 Knowledge"
+	case "Modern Age":
+		bannerText += "[green]You have reached the final age! Congratulations![::d]"
+	}
+
+	// Add version and creator info at the bottom
+	versionCreatorText := "\n[white][v1.0.0][::d]" + strings.Repeat(" ", 60) + "[white]Creator: Espresso[::d]"
+	bannerText += versionCreatorText
+
+	// Update the banner
+	d.banner.SetText(bannerText)
 
 	// Update status info
 	d.status.Clear()
