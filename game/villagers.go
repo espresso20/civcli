@@ -26,12 +26,11 @@ func NewVillagerManager() *VillagerManager {
 		Count:    0,
 		FoodCost: 3,
 		Assignment: VillagerAssignment{
-			"food":      0,
-			"wood":      0,
-			"stone":     0,
-			"gold":      0,
-			"knowledge": 0,
-			"idle":      0,
+			"food":  0,
+			"wood":  0,
+			"stone": 0,
+			"gold":  0,
+			"idle":  0,
 		},
 	}
 
