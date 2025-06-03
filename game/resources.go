@@ -10,18 +10,20 @@ type ResourceManager struct {
 func NewResourceManager() *ResourceManager {
 	rm := &ResourceManager{
 		resources: map[string]float64{
-			"food":      0,
+			"foraging":  0,
 			"wood":      0,
 			"stone":     0,
 			"gold":      0,
 			"knowledge": 0,
+			"hunting":   0,
 		},
 		collectionRates: map[string]float64{
-			"food":      2.3,
+			"foraging":  1.0,
 			"wood":      1.0,
 			"stone":     0.5,
 			"gold":      0.2,
 			"knowledge": 0.1,
+			"hunting":   1.8,
 		},
 	}
 	return rm

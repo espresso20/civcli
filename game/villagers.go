@@ -26,11 +26,12 @@ func NewVillagerManager() *VillagerManager {
 		Count:    0,
 		FoodCost: 2.1, // Adjusted to work better with starting villager
 		Assignment: VillagerAssignment{
-			"food":      0,
+			"foraging":  0,
 			"wood":      0,
 			"stone":     0,
 			"gold":      0,
 			"knowledge": 0,
+			"hunting":   0,
 			"idle":      0,
 		},
 	}
@@ -187,6 +188,11 @@ func (vm *VillagerManager) CollectResources(rm *ResourceManager, bm *BuildingMan
 						// Scholars gather knowledge at 150% of the normal rate
 						collectionRate *= 1.5
 					}
+				} else if resource == "hunting" {
+					// Hunting also provides some food in addition to hunting resource
+					// This demonstrates how to make a resource that has secondary effects
+					foodBonus := collectionRate * 0.4 // 40% of hunting collection goes to food as well
+					rm.Add("food", foodBonus*float64(count))
 				}
 
 				// Apply building bonuses

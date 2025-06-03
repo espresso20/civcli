@@ -150,7 +150,7 @@ func (d *Display) setupUI() {
 				// Get suggestions based on the command
 				switch command {
 				case "gather":
-					suggestions = []string{"food", "wood", "stone"}
+					suggestions = []string{"food", "wood", "stone", "hunting", "gold", "knowledge"}
 				case "build":
 					suggestions = []string{"hut", "farm", "mine"}
 				case "research":
