@@ -24,7 +24,7 @@ func NewVillagerManager() *VillagerManager {
 	// Initialize default villager types
 	vm.villagers["villager"] = &VillagerType{
 		Count:    0,
-		FoodCost: 2.1, // Adjusted to work better with starting villager
+		FoodCost: 0.5,
 		Assignment: VillagerAssignment{
 			"foraging":  0,
 			"wood":      0,
@@ -38,7 +38,7 @@ func NewVillagerManager() *VillagerManager {
 
 	vm.villagers["scholar"] = &VillagerType{
 		Count:    0,
-		FoodCost: 4.5, // Adjusted from 5 to keep scholar more expensive than villager
+		FoodCost: 0.75,
 		Assignment: VillagerAssignment{
 			"knowledge": 0,
 			"idle":      0,
@@ -173,80 +173,172 @@ func (vm *VillagerManager) GetFoodConsumption() float64 {
 
 // CollectResources collects resources based on villager assignments
 func (vm *VillagerManager) CollectResources(rm *ResourceManager, bm *BuildingManager) {
+	// First, collect all resources by villager type and assignment
+	vm.gatherAllResources(rm, bm)
+
+	// Then consume food from the total food pool
+	foodConsumption := vm.GetFoodConsumption()
+	rm.RemoveFood(foodConsumption)
+}
+
+// gatherAllResources handles the resource gathering for all villager types
+func (vm *VillagerManager) gatherAllResources(rm *ResourceManager, bm *BuildingManager) {
 	for vtype, v := range vm.villagers {
 		for resource, count := range v.Assignment {
-			if resource != "idle" && count > 0 {
-				// Calculate collection amount
-				collectionRate := rm.GetCollectionRate(resource)
+			if resource == "idle" || count <= 0 {
+				continue
+			}
 
-				// Apply villager-specific modifiers
-				if resource == "knowledge" {
-					if vtype == "villager" {
-						// Regular villagers gather knowledge at 20% of the normal rate
-						collectionRate *= 0.2
-					} else if vtype == "scholar" {
-						// Scholars gather knowledge at 150% of the normal rate
-						collectionRate *= 1.5
-					}
-				} else if resource == "hunting" {
-					// Hunting also provides some food in addition to hunting resource
-					// This demonstrates how to make a resource that has secondary effects
-					foodBonus := collectionRate * 0.4 // 40% of hunting collection goes to food as well
-					rm.Add("food", foodBonus*float64(count))
-				}
+			// Get the base collection rate for this resource
+			baseRate := rm.GetCollectionRate(resource)
 
-				// Apply building bonuses
-				buildingBonus := bm.GetCollectionRateBonus(vtype, resource)
-				collectionRate *= (1.0 + buildingBonus)
-
-				amount := float64(count) * collectionRate
-
-				// Add the resources
-				rm.Add(resource, amount)
+			// Calculate the final amount based on resource type
+			switch resource {
+			case "knowledge":
+				vm.gatherKnowledge(rm, bm, vtype, count, baseRate)
+			case "hunting":
+				vm.gatherHunting(rm, bm, vtype, count, baseRate)
+			default:
+				vm.gatherStandardResource(rm, bm, vtype, resource, count, baseRate)
 			}
 		}
 	}
+}
 
-	// Consume food
-	foodConsumption := vm.GetFoodConsumption()
-	rm.Remove("food", foodConsumption)
+// gatherKnowledge handles specialized knowledge gathering with different rates by villager type
+func (vm *VillagerManager) gatherKnowledge(rm *ResourceManager, bm *BuildingManager, vtype string, count int, baseRate float64) {
+	// Apply villager-specific knowledge gathering modifiers
+	modifiedRate := baseRate
+	if vtype == "villager" {
+		// Regular villagers gather knowledge at 20% of the normal rate
+		modifiedRate *= 0.2
+	} else if vtype == "scholar" {
+		// Scholars gather knowledge at 150% of the normal rate
+		modifiedRate *= 1.5
+	}
+
+	// Apply building bonuses
+	buildingBonus := bm.GetCollectionRateBonus(vtype, "knowledge")
+	modifiedRate *= (1.0 + buildingBonus)
+
+	// Calculate final amount and add the resource
+	amount := float64(count) * modifiedRate
+	rm.Add("knowledge", amount)
+}
+
+// gatherHunting handles hunting which provides both hunting resource and food bonus
+func (vm *VillagerManager) gatherHunting(rm *ResourceManager, bm *BuildingManager, vtype string, count int, baseRate float64) {
+	// Apply building bonuses to hunting rate
+	buildingBonus := bm.GetCollectionRateBonus(vtype, "hunting")
+	modifiedRate := baseRate * (1.0 + buildingBonus)
+
+	// Calculate hunting resource amount
+	amount := float64(count) * modifiedRate
+	rm.Add("hunting", amount)
+
+	// Add bonus food from hunting (40% of hunting collection)
+	foodBonus := baseRate * 0.4 * float64(count)
+	rm.Add("food", foodBonus)
+}
+
+// gatherStandardResource handles standard resource gathering without special rules
+func (vm *VillagerManager) gatherStandardResource(rm *ResourceManager, bm *BuildingManager, vtype string, resource string, count int, baseRate float64) {
+	// Apply building bonuses
+	buildingBonus := bm.GetCollectionRateBonus(vtype, resource)
+	modifiedRate := baseRate * (1.0 + buildingBonus)
+
+	// Calculate final amount and add the resource
+	amount := float64(count) * modifiedRate
+	rm.Add(resource, amount)
 }
 
 // CollectResourcesAndTrack collects resources based on villager assignments and tracks statistics
 func (vm *VillagerManager) CollectResourcesAndTrack(rm *ResourceManager, stats *GameStats, bm *BuildingManager) {
+	// Use the refactored resource gathering approach while tracking statistics
+	vm.gatherAllResourcesAndTrack(rm, bm, stats)
+
+	// Then consume food from the total food pool
+	foodConsumption := vm.GetFoodConsumption()
+	rm.RemoveFood(foodConsumption)
+}
+
+// gatherAllResourcesAndTrack handles resource gathering with statistics tracking
+func (vm *VillagerManager) gatherAllResourcesAndTrack(rm *ResourceManager, bm *BuildingManager, stats *GameStats) {
 	for vtype, v := range vm.villagers {
 		for resource, count := range v.Assignment {
-			if resource != "idle" && count > 0 {
-				// Calculate collection amount
-				collectionRate := rm.GetCollectionRate(resource)
+			if resource == "idle" || count <= 0 {
+				continue
+			}
 
-				// Apply villager-specific modifiers
-				if resource == "knowledge" {
-					if vtype == "villager" {
-						// Regular villagers gather knowledge at 20% of the normal rate
-						collectionRate *= 0.2
-					} else if vtype == "scholar" {
-						// Scholars gather knowledge at 150% of the normal rate
-						collectionRate *= 1.5
-					}
-				}
+			// Get the base collection rate for this resource
+			baseRate := rm.GetCollectionRate(resource)
 
-				// Apply building bonuses
-				buildingBonus := bm.GetCollectionRateBonus(vtype, resource)
-				collectionRate *= (1.0 + buildingBonus)
-
-				amount := float64(count) * collectionRate
-
-				// Add the resources
-				rm.Add(resource, amount)
-
-				// Track resource gathering in stats
+			// Calculate the final amount based on resource type and track statistics
+			switch resource {
+			case "knowledge":
+				amount := vm.gatherKnowledgeWithTracking(rm, bm, vtype, count, baseRate, stats)
+				stats.AddResourceGathered(resource, amount)
+			case "hunting":
+				huntingAmount, foodAmount := vm.gatherHuntingWithTracking(rm, bm, vtype, count, baseRate)
+				stats.AddResourceGathered(resource, huntingAmount)
+				stats.AddResourceGathered("food", foodAmount)
+			default:
+				amount := vm.gatherStandardResourceWithTracking(rm, bm, vtype, resource, count, baseRate)
 				stats.AddResourceGathered(resource, amount)
 			}
 		}
 	}
+}
 
-	// Consume food
-	foodConsumption := vm.GetFoodConsumption()
-	rm.Remove("food", foodConsumption)
+// gatherKnowledgeWithTracking handles specialized knowledge gathering with tracking
+func (vm *VillagerManager) gatherKnowledgeWithTracking(rm *ResourceManager, bm *BuildingManager, vtype string, count int, baseRate float64, stats *GameStats) float64 {
+	// Apply villager-specific knowledge gathering modifiers
+	modifiedRate := baseRate
+	if vtype == "villager" {
+		// Regular villagers gather knowledge at 20% of the normal rate
+		modifiedRate *= 0.2
+	} else if vtype == "scholar" {
+		// Scholars gather knowledge at 150% of the normal rate
+		modifiedRate *= 1.5
+	}
+
+	// Apply building bonuses
+	buildingBonus := bm.GetCollectionRateBonus(vtype, "knowledge")
+	modifiedRate *= (1.0 + buildingBonus)
+
+	// Calculate final amount and add the resource
+	amount := float64(count) * modifiedRate
+	rm.Add("knowledge", amount)
+
+	return amount
+}
+
+// gatherHuntingWithTracking handles hunting which provides both hunting resource and food bonus with tracking
+func (vm *VillagerManager) gatherHuntingWithTracking(rm *ResourceManager, bm *BuildingManager, vtype string, count int, baseRate float64) (float64, float64) {
+	// Apply building bonuses to hunting rate
+	buildingBonus := bm.GetCollectionRateBonus(vtype, "hunting")
+	modifiedRate := baseRate * (1.0 + buildingBonus)
+
+	// Calculate hunting resource amount
+	huntingAmount := float64(count) * modifiedRate
+	rm.Add("hunting", huntingAmount)
+
+	// Add bonus food from hunting (40% of hunting collection)
+	foodBonus := baseRate * 0.4 * float64(count)
+	rm.Add("food", foodBonus)
+
+	return huntingAmount, foodBonus
+}
+
+// gatherStandardResourceWithTracking handles standard resource gathering with tracking
+func (vm *VillagerManager) gatherStandardResourceWithTracking(rm *ResourceManager, bm *BuildingManager, vtype string, resource string, count int, baseRate float64) float64 {
+	// Apply building bonuses
+	buildingBonus := bm.GetCollectionRateBonus(vtype, resource)
+	modifiedRate := baseRate * (1.0 + buildingBonus)
+
+	// Calculate final amount and add the resource
+	amount := float64(count) * modifiedRate
+	rm.Add(resource, amount)
+
+	return amount
 }

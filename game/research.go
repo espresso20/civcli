@@ -10,12 +10,12 @@ type ResearchManager struct {
 
 // Technology represents a researchable technology
 type Technology struct {
-	Name        string
-	Description string
-	Age         string
-	Cost        float64
+	Name          string
+	Description   string
+	Age           string
+	Cost          float64
 	Prerequisites []string
-	Unlocks     map[string]interface{}
+	Unlocks       map[string]interface{}
 }
 
 // NewResearchManager creates a new research manager
@@ -28,21 +28,32 @@ func NewResearchManager() *ResearchManager {
 
 	// Define technologies
 	rm.technologies["agriculture"] = Technology{
-		Name:        "Agriculture",
-		Description: "Improve food production methods",
-		Age:         "Stone Age",
-		Cost:        20,
+		Name:          "Agriculture",
+		Description:   "Improve food production methods",
+		Age:           "Stone Age",
+		Cost:          20,
 		Prerequisites: []string{},
 		Unlocks: map[string]interface{}{
 			"food_production_bonus": 0.2,
 		},
 	}
 
+	rm.technologies["Bows"] = Technology{
+		Name:          "Bows",
+		Description:   "Develop bows for hunting and defense",
+		Age:           "Stone Age",
+		Cost:          30,
+		Prerequisites: []string{"agriculture"},
+		Unlocks: map[string]interface{}{
+			"hunting_production_bonus": 0.15,
+		},
+	}
+
 	rm.technologies["toolmaking"] = Technology{
-		Name:        "Toolmaking",
-		Description: "Develop better tools for resource gathering",
-		Age:         "Stone Age",
-		Cost:        25,
+		Name:          "Toolmaking",
+		Description:   "Develop better tools for resource gathering",
+		Age:           "Stone Age",
+		Cost:          25,
 		Prerequisites: []string{},
 		Unlocks: map[string]interface{}{
 			"resource_production_bonus": 0.1,
@@ -50,10 +61,10 @@ func NewResearchManager() *ResearchManager {
 	}
 
 	rm.technologies["writing"] = Technology{
-		Name:        "Writing",
-		Description: "Develop a writing system to record knowledge",
-		Age:         "Bronze Age",
-		Cost:        40,
+		Name:          "Writing",
+		Description:   "Develop a writing system to record knowledge",
+		Age:           "Bronze Age",
+		Cost:          40,
 		Prerequisites: []string{},
 		Unlocks: map[string]interface{}{
 			"knowledge_production_bonus": 0.2,
@@ -61,10 +72,10 @@ func NewResearchManager() *ResearchManager {
 	}
 
 	rm.technologies["metallurgy"] = Technology{
-		Name:        "Metallurgy",
-		Description: "Learn how to work with metals",
-		Age:         "Bronze Age",
-		Cost:        50,
+		Name:          "Metallurgy",
+		Description:   "Learn how to work with metals",
+		Age:           "Bronze Age",
+		Cost:          50,
 		Prerequisites: []string{},
 		Unlocks: map[string]interface{}{
 			"new_building": "foundry",
@@ -72,14 +83,14 @@ func NewResearchManager() *ResearchManager {
 	}
 
 	rm.technologies["mathematics"] = Technology{
-		Name:        "Mathematics",
-		Description: "Develop mathematical concepts",
-		Age:         "Iron Age",
-		Cost:        60,
+		Name:          "Mathematics",
+		Description:   "Develop mathematical concepts",
+		Age:           "Iron Age",
+		Cost:          60,
 		Prerequisites: []string{"writing"},
 		Unlocks: map[string]interface{}{
 			"knowledge_production_bonus": 0.3,
-			"resource_production_bonus": 0.1,
+			"resource_production_bonus":  0.1,
 		},
 	}
 
@@ -151,7 +162,7 @@ func (rm *ResearchManager) IsResearched(techName string) bool {
 // GetAvailableTechnologies returns technologies available for research in the current age
 func (rm *ResearchManager) GetAvailableTechnologies(currentAge string) map[string]Technology {
 	result := make(map[string]Technology)
-	
+
 	// Get age index
 	ageIndex := 0
 	ages := []string{"Stone Age", "Bronze Age", "Iron Age", "Medieval Age", "Renaissance Age", "Industrial Age", "Modern Age"}
@@ -161,7 +172,7 @@ func (rm *ResearchManager) GetAvailableTechnologies(currentAge string) map[strin
 			break
 		}
 	}
-	
+
 	// Get technologies from current and previous ages
 	for name, tech := range rm.technologies {
 		techAgeIndex := 0
@@ -171,7 +182,7 @@ func (rm *ResearchManager) GetAvailableTechnologies(currentAge string) map[strin
 				break
 			}
 		}
-		
+
 		// Technology is from current or previous age and not already researched
 		if techAgeIndex <= ageIndex && !rm.researchedTechs[name] {
 			// Check prerequisites
@@ -182,13 +193,13 @@ func (rm *ResearchManager) GetAvailableTechnologies(currentAge string) map[strin
 					break
 				}
 			}
-			
+
 			if allPrereqsMet {
 				result[name] = tech
 			}
 		}
 	}
-	
+
 	return result
 }
 
@@ -214,7 +225,7 @@ func (rm *ResearchManager) ApplyResearchBonuses(resourceRates map[string]float64
 	for resource, rate := range resourceRates {
 		result[resource] = rate
 	}
-	
+
 	// Apply global resource production bonus
 	globalBonus := 0.0
 	for tech, researched := range rm.researchedTechs {
@@ -224,13 +235,13 @@ func (rm *ResearchManager) ApplyResearchBonuses(resourceRates map[string]float64
 			}
 		}
 	}
-	
+
 	if globalBonus > 0 {
 		for resource, rate := range result {
 			result[resource] = rate * (1 + globalBonus)
 		}
 	}
-	
+
 	// Apply specific resource bonuses
 	for tech, researched := range rm.researchedTechs {
 		if researched {
@@ -245,13 +256,13 @@ func (rm *ResearchManager) ApplyResearchBonuses(resourceRates map[string]float64
 			}
 		}
 	}
-	
+
 	return result
 }
 
 // Helper function to extract resource type from bonus name
 func getResourceBonusType(bonusName string) string {
-	resourceTypes := []string{"food", "wood", "stone", "gold", "knowledge"}
+	resourceTypes := []string{"foraging", "hunting", "wood", "stone", "gold", "knowledge"}
 	for _, resource := range resourceTypes {
 		if bonusName == resource+"_production_bonus" {
 			return resource

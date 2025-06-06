@@ -17,31 +17,42 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	go func() {
-		<-sigs
-		fmt.Println("\nExiting CivIdleCli...")
-		os.Exit(0)
-	}()
+	// Show the splash screen and exit if the user quits
+	if err := ui.ShowSplashScreen(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error running splash screen: %v\n", err)
+		os.Exit(1)
+	}
 
-	// Create a CommandHandler instance
-	commandHandler := game.NewCommandHandler(nil) // Pass the GameEngine instance later
-
-	// Initialize the display with the CommandHandler
-	display := ui.NewDisplay(commandHandler)
+	// Now create the main display for the game
+	display := ui.NewDisplay()
 
 	// Initialize the game engine with the display
 	gameEngine := game.NewGameEngine(display)
 
-	// Update the CommandHandler to use the GameEngine
-	commandHandler.Game = gameEngine
+	// Create a command handler and connect it to the game engine
+	commandHandler := game.NewCommandHandler(gameEngine)
+	gameEngine.Commands = commandHandler
 
-	// Show the introduction
-	display.ShowIntro()
+	// Run the game engine in a goroutine
+	go func() {
+		// Start the game engine
+		if err := gameEngine.Start(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error running game: %v\n", err)
+			os.Exit(1)
+		}
+	}()
 
-	// Start the game
-	err := gameEngine.Start()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error running game: %v\n", err)
+	// Handle OS signals
+	go func() {
+		<-sigs
+		fmt.Println("\nExiting CivIdleCli...")
+		display.Stop()
+		os.Exit(0)
+	}()
+
+	// Run the UI program (this blocks until the program exits)
+	if err := display.Start(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error running UI: %v\n", err)
 		os.Exit(1)
 	}
 }

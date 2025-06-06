@@ -286,14 +286,14 @@ func (ch *CommandHandler) CmdRecruit(args []string) {
 		}
 	}
 
-	// Check food
-	if !ch.Game.Resources.Has("food", foodCost) {
+	// Check if there's enough total food (from all food sources)
+	if !ch.Game.Resources.HasFood(foodCost) {
 		ch.Game.Display.ShowMessage("Not enough food. Need "+strconv.FormatFloat(foodCost, 'f', 0, 64)+" food.", "error")
 		return
 	}
 
 	// Recruit villagers
-	ch.Game.Resources.Remove("food", foodCost)
+	ch.Game.Resources.RemoveFood(foodCost)
 	ch.Game.Villagers.Add(villagerType, count)
 	ch.Game.Display.ShowMessage("Recruited "+strconv.Itoa(count)+" new "+villagerType+"s", "success")
 

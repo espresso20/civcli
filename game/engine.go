@@ -28,7 +28,6 @@ type GameEngine struct {
 
 // DisplayInterface defines the interface for the UI display
 type DisplayInterface interface {
-	ShowIntro()
 	ShowHelp(commands map[string]string)
 	ShowMessage(message string, style string)
 	ShowAgeAdvancement(newAge string)
@@ -80,32 +79,68 @@ func (ge *GameEngine) initializeGame() {
 	ge.Villagers.Add("villager", 1)
 }
 
-// Start starts the main game loop
+// Start initializes and starts the game engine
 func (ge *GameEngine) Start() error {
 	ge.Running = true
 
-	// Start the UI refresh loop
-	go ge.refreshLoop()
+	// Initialize all subsystems if they haven't been already
+	if ge.Resources == nil {
+		ge.Resources = NewResourceManager()
+	}
+	if ge.Buildings == nil {
+		ge.Buildings = NewBuildingManager()
+	}
+	if ge.Villagers == nil {
+		ge.Villagers = NewVillagerManager()
+	}
+	if ge.Progress == nil {
+		ge.Progress = NewProgressManager()
+	}
+	if ge.Research == nil {
+		ge.Research = NewResearchManager()
+	}
+	if ge.Library == nil {
+		ge.Library = NewLibrarySystem()
+	}
+	if ge.Stats == nil {
+		ge.Stats = NewGameStats()
+	}
+	if ge.Commands == nil {
+		ge.Commands = NewCommandHandler(ge)
+	}
 
-	return ge.mainLoop()
+	ge.RefreshRate = 500 * time.Millisecond
+	ge.stopRefresh = make(chan bool)
+
+	// Start the UI refresh goroutine
+	go ge.refreshUILoop()
+
+	// Run the main game loop
+	err := ge.mainLoop()
+
+	// Signal UI to stop refreshing
+	select {
+	case <-ge.stopRefresh:
+		// Channel already closed, do nothing
+	default:
+		close(ge.stopRefresh)
+	}
+
+	// Return any error from the main loop
+	return err
 }
 
-// refreshLoop handles the periodic refreshing of the UI
-func (ge *GameEngine) refreshLoop() {
+// refreshUILoop updates the UI at regular intervals
+func (ge *GameEngine) refreshUILoop() {
 	ticker := time.NewTicker(ge.RefreshRate)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			// Calculate elapsed ticks since last update
-			elapsedTicks := ge.calculateElapsedTicks()
-
-			// Process those ticks
-			ge.updateMultipleTicks(elapsedTicks)
-
-			// Refresh the display
-			ge.Display.DisplayDashboard(ge.GetGameState())
+			// Update the game state and refresh the UI
+			gameState := ge.GetGameState()
+			ge.Display.DisplayDashboard(gameState)
 		case <-ge.stopRefresh:
 			return
 		}

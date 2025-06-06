@@ -14,7 +14,33 @@ type GameState struct {
 		Cost       float64
 		Researched []string
 	}
-	TickDurationSeconds float64 // Add tick duration (seconds per tick) for UI display
+	TickDurationSeconds float64  // Add tick duration (seconds per tick) for UI display
+	foodSources         []string // List of resources that count as food
+	TotalFood           float64  // Total amount of food from all food sources
+}
+
+// GetTotalFood returns the sum of all food resources
+func (gs *GameState) GetTotalFood() float64 {
+	var total float64
+
+	// If we have the food sources list, use it
+	if len(gs.foodSources) > 0 {
+		for _, source := range gs.foodSources {
+			if amount, exists := gs.Resources[source]; exists {
+				total += amount
+			}
+		}
+	} else {
+		// Default food sources if not explicitly defined
+		foodSources := []string{"foraging", "hunting"}
+		for _, source := range foodSources {
+			if amount, exists := gs.Resources[source]; exists {
+				total += amount
+			}
+		}
+	}
+
+	return total
 }
 
 // GameStateProvider defines an interface for accessing game state information
@@ -30,15 +56,16 @@ var _ GameStateProvider = (*GameEngine)(nil)
 func (ge *GameEngine) GetGameState() GameState {
 	// Get research info
 	currentResearch, progress, cost := ge.Research.GetProgress()
-	
+
 	// Get researched technologies
 	researchedTechs := ge.Research.GetResearchedTechnologies()
 	researched := make([]string, 0, len(researchedTechs))
 	for name := range researchedTechs {
 		researched = append(researched, name)
 	}
-	
-	return GameState{
+
+	// Create GameState with food sources
+	gameState := GameState{
 		Age:         ge.Age,
 		Tick:        ge.Tick,
 		Resources:   ge.Resources.GetAll(),
@@ -56,6 +83,9 @@ func (ge *GameEngine) GetGameState() GameState {
 			Cost:       cost,
 			Researched: researched,
 		},
-		TickDurationSeconds: ge.TickDuration.Seconds(), // Pass tick duration to UI
+		TickDurationSeconds: ge.TickDuration.Seconds(),   // Pass tick duration to UI
+		TotalFood:           ge.Resources.GetTotalFood(), // Pass total food value separately
 	}
+
+	return gameState
 }

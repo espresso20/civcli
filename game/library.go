@@ -52,6 +52,46 @@ occupy buildings, and help your civilization grow and advance.
 - In early ages, focus on resources needed for advancement
 `)
 
+	ls.AddTopic("food", "Food Management Guide", `
+[::b][#3498db]FOOD MANAGEMENT[#ffffff][::b]
+
+Food is the most critical resource in CivIdleCli, as it sustains your population
+and allows for recruitment of new villagers.
+
+[#f1c40f]Food System Overview:[#ffffff]
+- Food is an aggregate resource that comes from multiple sources
+- Total food is shown as "FOOD SUPPLY" in the resources panel
+- Individual food sources contribute to your total food supply
+- Food is consumed each tick by your population
+
+[#f1c40f]Food Sources:[#ffffff]
+- Foraging: Primary food source in early game
+  - Assign villagers using: assign villager foraging <count>
+- Hunting: Secondary food source that also provides hunting resources
+  - Assign villagers using: assign villager hunting <count>
+  - 40% of hunting collection is automatically converted to food
+- Farms: Buildings that produce passive food (3.0 per tick)
+  - Build with: build farm
+
+[#f1c40f]Food Consumption:[#ffffff]
+- Regular villagers consume 1.5 food per tick
+- Scholars consume 4.5 food per tick
+- Total consumption is displayed in the Food Status section
+
+[#f1c40f]Food UI Elements:[#ffffff]
+- Food Supply: Shows your total combined food from all sources
+- Food Sources: Individual sources with percentages of contribution
+- Warning Colors: Green (good), Yellow (warning), Red (critical)
+- Food Status: Shows consumption rate and net balance per tick
+
+[#f1c40f]Food Strategy:[#ffffff]
+- Always maintain a positive food balance
+- Keep a buffer of at least 30 × [number of villagers] food
+- Build farms early to establish passive food income
+- Monitor the food balance indicator (positive number is good)
+- If food balance turns negative, immediately prioritize food production
+`)
+
 	ls.AddTopic("resources", "Resources Guide", `
 [::b][#3498db]RESOURCES[#ffffff][::b]
 
@@ -59,7 +99,9 @@ Resources are the foundation of your civilization's growth and advancement.
 Different resources become available as you progress through ages.
 
 [#f1c40f]Basic Resources:[#ffffff]
-- Food: Required to support your population and recruit villagers
+- Food: Aggregate resource from various sources (foraging, hunting)
+  - Used to support your population and recruit villagers
+  - See 'library food' for detailed food management
 - Wood: Used for basic buildings and early technology
 - Stone: Used for more advanced buildings (Bronze Age+)
 - Gold: Used for trade and advanced structures (Iron Age+)
@@ -177,15 +219,19 @@ Here are some helpful tips to succeed in CivIdleCli:
 [#f1c40f]Early Game (Stone Age):[#ffffff]
 - Focus on building 4-5 huts first to increase population capacity
 - Recruit villagers up to your capacity
-- Assign most villagers to gathering food and wood
-- Build a farm to generate passive food
+- Balance villagers between foraging and hunting for food diversity
+- Build a farm as soon as possible for passive food generation
+- Monitor the Food Supply section for your total available food
+- Watch the Food Status indicator to ensure a positive balance
 - Work toward Bronze Age requirements
 
 [#f1c40f]Mid Game (Bronze/Iron Age):[#ffffff]
 - Balance resource gathering based on advancement needs
 - Build specialized production buildings (mines, lumber mills)
 - Start focusing on knowledge once libraries are available
-- Don't neglect food production as your population grows
+- Maintain at least one farm per 2-3 villagers for stable food supply
+- Pay attention to food percentage contributions in the resources panel
+- Keep a buffer of at least 30 × [number of villagers] food
 - Gradually shift toward gold production for later ages
 
 [#f1c40f]Late Game (Medieval+):[#ffffff]
