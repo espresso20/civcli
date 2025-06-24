@@ -90,7 +90,7 @@ func (d *Dashboard) initializePanels() {
 	// Command input - bottom
 	d.commandInput = tview.NewInputField().
 		SetLabel("Command: ").
-		SetPlaceholder("Type commands here (e.g., 'build house', 'research farming') or 'help' for assistance").
+		SetPlaceholder("Type commands here (e.g., 'build huts', 'research farming') or 'help' for assistance").
 		SetFieldBackgroundColor(theme.Background).
 		SetFieldTextColor(theme.Foreground)
 
@@ -203,7 +203,7 @@ func (d *Dashboard) updateStatsDisplay() {
 		content.WriteString("👥 Starting villagers...\n")
 		content.WriteString("🌾 Gathering food...\n")
 		content.WriteString("\n[cyan]Tip:[white] Start by building")
-		content.WriteString(" houses to support more villagers!")
+		content.WriteString(" hutss to support more villagers!")
 	}
 
 	d.statsPanel.SetText(content.String())
@@ -220,7 +220,7 @@ func (d *Dashboard) updateBuildingsDisplay() {
 		}
 	} else {
 		content.WriteString("[yellow]Available Buildings:[white]\n\n")
-		content.WriteString("🏠 [green]House[white] - Increase population capacity\n")
+		content.WriteString("🏠 [green]huts[white] - Increase population capacity\n")
 		content.WriteString("   Cost: 10 Wood, 5 Stone\n\n")
 		content.WriteString("🌾 [green]Farm[white] - Produce food automatically\n")
 		content.WriteString("   Cost: 5 Wood, 15 Food\n\n")
@@ -278,7 +278,7 @@ func (d *Dashboard) updateLogDisplay() {
 	if len(d.messages) == 0 {
 		content.WriteString("[cyan]Game started successfully![white]\n")
 		content.WriteString("Type 'help' for a list of available commands.\n")
-		content.WriteString("Begin by building houses and farms to grow your civilization!\n")
+		content.WriteString("Begin by building hutss and farms to grow your civilization!\n")
 	} else {
 		// Show last 10 messages
 		start := 0

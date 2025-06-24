@@ -139,9 +139,9 @@ func (ge *GameEngine) LoadGame(filename string) error {
 	if ge.Research == nil {
 		ge.Research = NewResearchManager()
 	}
-	if ge.Library == nil {
-		ge.Library = NewLibrarySystem()
-	}
+	// if ge.Library == nil {
+	// 	ge.Library = NewLibrarySystem()
+	// }
 
 	// Restore or create statistics
 	if save.Stats != nil {

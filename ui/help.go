@@ -142,7 +142,7 @@ Welcome to CivIdleCli, a command-line civilization building game! Here's everyth
 [cyan::b]🎯 Your First Steps[white::-]
 
 1. [green]Check your status:[white] Look at the stats panel to see your current resources
-2. [green]Build houses:[white] Type 'build house' to increase your population capacity
+2. [green]Build huts:[white] Type 'build huts' to increase your population capacity
 3. [green]Gather food:[white] Your villagers automatically forage and hunt for food
 4. [green]Research agriculture:[white] Type 'research agriculture' to improve food production
 5. [green]Expand:[white] Build more structures and research new technologies
@@ -270,7 +270,7 @@ Buildings are the foundation of your civilization. Each building type serves a s
 
 [cyan::b]🎯 Building Strategy[white::-]
 
-1. [yellow]Start with houses[white] - More villagers = more resource gathering
+1. [yellow]Start with huts[white] - More villagers = more resource gathering
 2. [yellow]Build farms early[white] - Ensure food security for your growing population
 3. [yellow]Balance production[white] - Don't focus on just one resource type
 4. [yellow]Plan ahead[white] - Some buildings require resources from other buildings
@@ -407,7 +407,7 @@ Resources are the lifeblood of your civilization. Understanding how to gather, m
 [green]Early Game (Stone Age):[white]
 • Focus: Food security, basic shelter
 • Priority: Food > Wood > Stone
-• Strategy: Build houses and farms first
+• Strategy: Build huts and farms first
 
 [green]Mid Game (Bronze Age):[white]
 • Focus: Tool production, infrastructure
@@ -427,7 +427,7 @@ Resources are the lifeblood of your civilization. Understanding how to gather, m
 • [yellow]Research matters:[white] Technology improvements compound over time
 
 [green::b]⚠️ Common Mistakes:[white::-]
-• Overbuilding houses without food production
+• Overbuilding huts without food production
 • Ignoring tool production for too long
 • Not researching efficiency improvements
 • Focusing on only one resource type`
@@ -481,7 +481,7 @@ Your villagers are the heart of your civilization. They gather resources, work i
 [cyan::b]🎯 Population Strategy[white::-]
 
 [yellow]Early Game:[white]
-• Build houses to increase capacity
+• Build huts to increase capacity
 • Focus on food production to support growth
 • Aim for 20-30 villagers quickly
 
@@ -515,7 +515,7 @@ Your villagers are the heart of your civilization. They gather resources, work i
 • Plan for increased complexity
 
 [green::b]⚠️ Common Issues:[white::-]
-• Building too many houses without food production
+• Building too many huts without food production
 • Ignoring the relationship between population and consumption
 • Not building enough production to support large populations`
 
@@ -623,14 +623,14 @@ Master these strategies to build the most efficient and successful civilization.
 [cyan::b]🚀 Early Game Optimization[white::-]
 
 [green]Opening Strategy:[white]
-• Build 2-3 houses immediately (population capacity)
+• Build 2-3 huts immediately (population capacity)
 • Construct 1-2 farms for food security
 • Start Agriculture research ASAP
 • Monitor food consumption vs. production
 
 [green]Resource Priority:[white]
-1. [yellow]Food security[white] - Build farms before houses
-2. [yellow]Population growth[white] - Houses enable more workers
+1. [yellow]Food security[white] - Build farms before huts
+2. [yellow]Population growth[white] - huts enable more workers
 3. [yellow]Wood production[white] - Lumber mills for construction materials
 4. [yellow]Technology[white] - Research for efficiency improvements
 
@@ -695,7 +695,7 @@ Master these strategies to build the most efficient and successful civilization.
 
 [cyan::b]⚠️ Common Pitfalls[white::-]
 
-• [red]Overbuilding houses[white] without corresponding food production
+• [red]Overbuilding huts[white] without corresponding food production
 • [red]Ignoring research[white] - technology improvements are huge
 • [red]Resource hoarding[white] - unused resources don't generate value
 • [red]Impatience[white] - the game rewards planning and patience

@@ -7,16 +7,16 @@ import (
 
 // GameEngine represents the main game state and logic
 type GameEngine struct {
-	Display        DisplayInterface
-	Running        bool
-	Tick           int
-	Age            string
-	Resources      *ResourceManager
-	Buildings      *BuildingManager
-	Villagers      *VillagerManager
-	Progress       *ProgressManager
-	Research       *ResearchManager
-	Library        *LibrarySystem
+	Display   DisplayInterface
+	Running   bool
+	Tick      int
+	Age       string
+	Resources *ResourceManager
+	Buildings *BuildingManager
+	Villagers *VillagerManager
+	Progress  *ProgressManager
+	Research  *ResearchManager
+	// Library        *LibrarySystem
 	Commands       *CommandHandler
 	Stats          *GameStats
 	TickDuration   time.Duration
@@ -54,7 +54,7 @@ func NewGameEngine(display DisplayInterface) *GameEngine {
 	ge.Villagers = NewVillagerManager()
 	ge.Progress = NewProgressManager()
 	ge.Research = NewResearchManager()
-	ge.Library = NewLibrarySystem()
+	// ge.Library = NewLibrarySystem()
 	ge.Stats = NewGameStats()
 
 	// Initialize game state
@@ -96,9 +96,9 @@ func (ge *GameEngine) Start() error {
 	if ge.Research == nil {
 		ge.Research = NewResearchManager()
 	}
-	if ge.Library == nil {
-		ge.Library = NewLibrarySystem()
-	}
+	// if ge.Library == nil {
+	// 	ge.Library = NewLibrarySystem()
+	// }
 	if ge.Stats == nil {
 		ge.Stats = NewGameStats()
 	}
