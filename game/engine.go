@@ -1,7 +1,6 @@
 package game
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
@@ -32,8 +31,6 @@ type DisplayInterface interface {
 	ShowMessage(message string, style string)
 	ShowAgeAdvancement(newAge string)
 	DisplayDashboard(state GameState)
-	ShowLibraryContent(title, content string)
-	ShowLibraryTopicsList(topics map[string]string)
 	GetInput() (string, error)
 	Stop()
 }
@@ -150,10 +147,12 @@ func (ge *GameEngine) refreshUILoop() {
 // mainLoop is the main game loop
 func (ge *GameEngine) mainLoop() error {
 	for ge.Running {
-		// Get user command
+		// Get user command (non-blocking)
 		userInput, err := ge.Display.GetInput()
 		if err != nil {
-			return errors.New("error getting user input: " + err.Error())
+			// No input ready, continue loop (allows UI updates to happen)
+			time.Sleep(10 * time.Millisecond)
+			continue
 		}
 
 		// Process command (ticks are now handled by the refresh loop)

@@ -68,45 +68,98 @@ func (ge *GameEngine) LoadGame(filename string) error {
 	// Unmarshal the JSON
 	var save GameSave
 	if err := json.Unmarshal(saveData, &save); err != nil {
-		return fmt.Errorf("failed to unmarshal save data: %w", err)
+		return fmt.Errorf("failed to unmarshal save data - save file may be corrupted or from an incompatible version: %w", err)
 	}
 
-	// Restore game state
+	// Validate essential fields
+	if save.Age == "" {
+		return fmt.Errorf("save file is missing required 'age' field")
+	}
+	if save.Resources == nil {
+		return fmt.Errorf("save file is missing required 'resources' field")
+	}
+
+	// Note: We don't stop the game engine anymore since it can cause the main loop to exit
+	// The game state update is atomic enough that we can safely update while running
+
+	// Restore game state safely
 	ge.Tick = save.Tick
 	ge.Age = save.Age
 
-	// Restore resources
+	// Restore resources (ensure Resources manager exists)
+	if ge.Resources == nil {
+		ge.Resources = NewResourceManager()
+	}
+	// Clear and restore resources
+	ge.Resources.resources = make(map[string]float64)
 	for resource, amount := range save.Resources {
 		ge.Resources.resources[resource] = amount
 	}
 
-	// Restore buildings
-	for building, count := range save.Buildings {
-		ge.Buildings.buildings[building] = count
+	// Restore buildings (ensure Buildings manager exists)
+	if ge.Buildings == nil {
+		ge.Buildings = NewBuildingManager()
+	}
+	// Clear and restore buildings
+	ge.Buildings.buildings = make(map[string]int)
+	if save.Buildings != nil {
+		for building, count := range save.Buildings {
+			ge.Buildings.buildings[building] = count
+		}
 	}
 
-	// Restore villagers
-	for vtype, info := range save.Villagers {
-		if _, exists := ge.Villagers.villagers[vtype]; exists {
-			ge.Villagers.villagers[vtype].Count = info.Count
-			for resource, count := range info.Assignment {
-				ge.Villagers.villagers[vtype].Assignment[resource] = count
+	// Restore villagers (ensure Villagers manager exists)
+	if ge.Villagers == nil {
+		ge.Villagers = NewVillagerManager()
+	}
+	// Clear and restore villagers
+	ge.Villagers.villagers = make(map[string]*VillagerType)
+	if save.Villagers != nil {
+		for vtype, info := range save.Villagers {
+			// Create new villager entry with safe defaults
+			assignment := make(VillagerAssignment)
+			if info.Assignment != nil {
+				for resource, count := range info.Assignment {
+					assignment[resource] = count
+				}
+			}
+
+			ge.Villagers.villagers[vtype] = &VillagerType{
+				Count:      info.Count,
+				FoodCost:   0.5, // Default food cost
+				Assignment: assignment,
 			}
 		}
 	}
 
-	// Restore statistics if available
-	if save.Stats != nil {
-		ge.Stats = save.Stats
+	// Ensure other managers exist
+	if ge.Progress == nil {
+		ge.Progress = NewProgressManager()
+	}
+	if ge.Research == nil {
+		ge.Research = NewResearchManager()
+	}
+	if ge.Library == nil {
+		ge.Library = NewLibrarySystem()
 	}
 
-	// Restore LastUpdateTime or set to current time if not available
+	// Restore or create statistics
+	if save.Stats != nil {
+		ge.Stats = save.Stats
+	} else {
+		if ge.Stats == nil {
+			ge.Stats = NewGameStats()
+		}
+	}
+
+	// Restore LastUpdateTime or set to current time
 	if !save.LastUpdateTime.IsZero() {
 		ge.LastUpdateTime = save.LastUpdateTime
 	} else {
 		ge.LastUpdateTime = time.Now()
 	}
 
+	// No need to restart the engine since we didn't stop it
 	return nil
 }
 

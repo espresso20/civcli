@@ -26,7 +26,6 @@ func NewCommandHandler(gameEngine *GameEngine) *CommandHandler {
 			"buildings": "List available buildings and their costs",
 			"research":  "Start researching a technology (research <technology>)",
 			"techs":     "List available technologies for research",
-			"library":   "Access the in-game library (library [topic])",
 			"save":      "Save the current game (save <filename>)",
 			"load":      "Load a saved game (load <filename>)",
 			"saves":     "List all saved games",
@@ -89,8 +88,6 @@ func (ch *CommandHandler) Process(commandStr string) {
 		ch.CmdListSaves()
 	case "stats":
 		ch.CmdStats()
-	case "library":
-		ch.CmdLibrary(args)
 	case "clear":
 		// This will be handled in the UI
 	case "quit":
@@ -503,44 +500,5 @@ func (ch *CommandHandler) CmdTechs() {
 		for name, tech := range researchedTechs {
 			ch.Game.Display.ShowMessage(name+": "+tech.Description, "info")
 		}
-	}
-}
-
-// CmdLibrary displays the in-game library content
-func (ch *CommandHandler) CmdLibrary(args []string) {
-	// If no topic specified, show the list of available topics (CLI-only)
-	if len(args) == 0 {
-		ch.Game.Display.ShowLibraryTopicsList(ch.Game.Library.GetTopicList())
-		return
-	}
-
-	// Get the requested topic
-	topicID := strings.ToLower(args[0])
-	topic := ch.Game.Library.GetTopic(topicID)
-
-	if topic == nil {
-		// Try to search for the topic
-		searchResults := ch.Game.Library.SearchTopics(topicID)
-
-		if len(searchResults) == 0 {
-			ch.Game.Display.ShowMessage("Topic not found: "+topicID, "error")
-			return
-		} else if len(searchResults) == 1 {
-			// If only one result, show that topic
-			for id := range searchResults {
-				topic = ch.Game.Library.GetTopic(id)
-				break
-			}
-		} else {
-			// Multiple results, show the list of matching topics (CLI-only)
-			ch.Game.Display.ShowLibraryTopicsList(searchResults)
-			return
-		}
-	}
-
-	if topic != nil {
-		ch.Game.Display.ShowLibraryContent(topic.Title, topic.Content)
-	} else {
-		ch.Game.Display.ShowMessage("Topic not found: "+topicID, "error")
 	}
 }
