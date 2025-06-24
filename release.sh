@@ -2,7 +2,7 @@
 
 # Create a release package for CivIdleCli
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 PACKAGE_NAME="cividlecli-${VERSION}"
 
 echo "Creating release package for CivIdleCli v${VERSION}..."
